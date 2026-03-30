@@ -4686,13 +4686,13 @@ if (["CYBER_SNIPER", "COLOR_SNIPER", "ULTRA_SNIPER", "CHAOS_SEEKER"].includes(se
   const gameType = settings.game_type || "TRX";
 
   const startMessage = 
-    `${EMOJI.START} *BOT ACTIVATED*\n` +
+    `${EMOJI.START} *Bot စတင်အလုပ်လုပ်ပြီ*\n` +
     `${STYLE.SEPARATOR}\n\n` +
-    `${EMOJI.BALANCE} Balance: ${currentBalance} Ks\n\n` +
-    `${EMOJI.GAME} Game: ${safeEscape(gameType)}\n` +
-    `${EMOJI.MODE} Type: ${betType === "COLOR" ? "Color" : "Big/Small"}\n` +
-    `${EMOJI.STRATEGY} Strategy: ${(strategyText)}\n` +
-    `${EMOJI.SETTINGS} Mode: ${safeEscape(bettingStrategyText)}\n\n` +
+    `${EMOJI.BALANCE} လက်ကျန်ငွေ : ${currentBalance} Ks\n\n` +
+    `${EMOJI.GAME} ဂိမ်း: ${safeEscape(gameType)}\n` +
+    `${EMOJI.MODE} အမျိုးအစား: ${betType === "COLOR" ? "Color" : "Big/Small"}\n` +
+    `${EMOJI.STRATEGY} နည်းဗျူဟာ: ${(strategyText)}\n` +
+    `${EMOJI.SETTINGS} မုဒ်: ${safeEscape(bettingStrategyText)}\n\n` +
     `${EMOJI.TARGET} Target: ${safeEscape(profitTargetText)}\n` +
     `${EMOJI.STOP} Stop Loss: ${safeEscape(stopLossText)}\n\n` +
     `${STYLE.SEPARATOR}\n` +
@@ -5200,7 +5200,7 @@ try {
           patternInfo = ` (Pattern Index: ${currentIndex})`;
         }
         
-        let betMsg = `${safeEscape(gameId)}\n${betEmoji} ရွေးချယ်မှု : ${safeEscape(betChoiceText)} \nထိုးကြေး ${actualAmount} Ks\n${EMOJI.STRATEGY} Strategy: ${safeEscape(strategyText)}`;
+        let betMsg = `${safeEscape(gameId)}\n${betEmoji} ရွေးချယ်မှု : ${safeEscape(betChoiceText)} \n💵 ထိုးကြေး : ${actualAmount} Ks\n${EMOJI.STRATEGY} နည်းဗျူဟာ: ${safeEscape(strategyText)}`;
         
         await sendMessageWithRetry(ctx, betMsg);
         
@@ -6761,7 +6761,7 @@ let balanceText = "";
   
   if (buttonText === `${EMOJI.BALANCE} လောင်းကြေး သတ်မှတ်`) {
     userState[userId] = { state: "INPUT_BET_SIZES" };
-    await sendMessageWithRetry(ctx, `${EMOJI.BALANCE} Enter bet sizes (one per line):\n${STYLE.CODE('100')}\n${STYLE.CODE('200')}\n${STYLE.CODE('500')}`, makeMainKeyboard(true, isAdmin));
+    await sendMessageWithRetry(ctx, `${EMOJI.BALANCE} လောင်းကြေးထိုးရန် ထိုးငွေ ပမာဏ ပို့ပါ (တစ်ကြိမ်သာ ပို့ပါ):\n${STYLE.CODE('100')}\n${STYLE.CODE('200')}\n${STYLE.CODE('500')}`, makeMainKeyboard(true, isAdmin));
     return;
   }
   
@@ -7218,4 +7218,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-    }
+}
