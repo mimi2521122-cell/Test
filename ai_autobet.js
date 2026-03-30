@@ -902,7 +902,7 @@ async function placeBetRequest(session, issueNumber, selectType, unitAmount, bet
   betBody.timestamp = Math.floor(Date.now() / 1000);
   
   logging.info(`Bet request details for user ${userId}:`);
-  logging.info(`  Game Type: ${gameType}, Bet Type: ${betType}, API gameType: ${actualGameType}`);
+  logging.info(`  ဂိမ်းအမျိုးအစား: ${gameType}, လောင်းကြေးအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
   logging.info(`  Issue: ${issueNumber}, SelectType: ${selectType}, Amount: ${unitAmount * betCount}`);
   
   for (let attempt = 0; attempt < MAX_BET_RETRIES; attempt++) {
@@ -4062,7 +4062,7 @@ if (settings.strategy === "GEMINI_AI") {
                 const totalProfit = isVirtual 
                   ? (userStats[userId].virtual_balance - (userStats[userId].initial_balance || 0))
                   : (userStats[userId]?.profit || 0);
-                message = `${EMOJI.WIN} ${STYLE.BOLD('VICTORY')} +${winAmount.toFixed(2)} Ks\n` +
+                message = `${EMOJI.WIN} ${STYLE.BOLD('အနိုင်ရရှိသည်')} +${winAmount.toFixed(2)} Ks\n` +
                          `${STYLE.SEPARATOR}\n`+
                          `${gameId}\n` +
                          `${resultText}\n` +
@@ -4079,7 +4079,7 @@ if (settings.strategy === "GEMINI_AI") {
                   slStatusLine = `${EMOJI.WARNING} Consecutive Losses: ${consecutiveLosses}/${settings.sl_layer}\n`;
                 }
                 
-                message = `${EMOJI.LOSS} ${STYLE.BOLD('LOSS')} -${amount} Ks\n` +
+                message = `${EMOJI.LOSS} ${STYLE.BOLD('ရှုံးပါတယ်')} -${amount} Ks\n` +
                          `${STYLE.SEPARATOR}\n`+
                          `${gameId}\n` +
                          `${resultText}\n` +
@@ -5200,7 +5200,7 @@ try {
           patternInfo = ` (Pattern Index: ${currentIndex})`;
         }
         
-        let betMsg = `${safeEscape(gameId)}\n${betEmoji} Order: ${safeEscape(betChoiceText)} → ${actualAmount} Ks\n${EMOJI.STRATEGY} Strategy: ${safeEscape(strategyText)}`;
+        let betMsg = `${safeEscape(gameId)}\n${betEmoji} ရွေးချယ်မှု : ${safeEscape(betChoiceText)} \nထိုးကြေး ${actualAmount} Ks\n${EMOJI.STRATEGY} Strategy: ${safeEscape(strategyText)}`;
         
         await sendMessageWithRetry(ctx, betMsg);
         
@@ -5347,12 +5347,12 @@ function makeMainKeyboard(loggedIn = false, isAdmin = false) {
   }
   
   let keyboard = [
-    [`${EMOJI.START} Start Bot`, `${EMOJI.STOP} Stop Bot`],
-    [`${EMOJI.BALANCE} Bet Size`, `${EMOJI.GAME} Game Mode`],
-    [`${EMOJI.TARGET} Game Type`, `${EMOJI.COLOR} Bet Type`, `${EMOJI.STRATEGY} Strategy`],
-    [`${EMOJI.SETTINGS} Betting Settings`, `${EMOJI.RISK} Risk Management`],
+    [`${EMOJI.START} စတင်ကစားမယ်`, `${EMOJI.STOP} ကစားတာ ရပ်မယ်`],
+    [`${EMOJI.BALANCE} လောင်းကြေး သတ်မှတ်`, `${EMOJI.GAME} ဂိမ်း မုဒ်`],
+    [`${EMOJI.TARGET} ဂိမ်းအမျိုးအစား`, `${EMOJI.COLOR} လောင်းကြေးအမျိုးအစား`, `${EMOJI.STRATEGY} နည်းဗျူဟာ`],
+    [`${EMOJI.SETTINGS} လောင်းကစား ဆက်တင်များ`, `${EMOJI.RISK} အန္တရာယ်စီမံခန့်ခွဲမှု`],
     // AI Mode ခလုတ်ထည့်ရန်
-    [`${EMOJI.AI} AI Mode`, `${EMOJI.INFO} Account Info`, `${EMOJI.LOGOUT} Re-Login`]
+    [`${EMOJI.AI} AI Mode`, `${EMOJI.INFO} အချက်အလက်`, `${EMOJI.LOGOUT} Re-Login`]
   ];
   
   if (isAdmin) {
@@ -5646,6 +5646,8 @@ async function cmdStartHandler(ctx) {
  🎮 Games: TRX & WINGO
  🧠 Logic: 12+ Pro Strategies
  🤖 AI Mode: Smart Auto-Trading
+ ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
+ https://www.777bigwingame.co/#/register?invitationCode=84318565611
 ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
 
 ${loggedIn ? '⚡️ System Ready! Choose an option 👇' : '🔐 Please Login to connect system 👇'}`;
@@ -6167,12 +6169,12 @@ if (data.startsWith("bet_type:")) {
   if (betType === "COLOR") {
 
     await sendMessageWithRetry(ctx, 
-      `${EMOJI.SUCCESS} ${STYLE.BOLD('Bet Type: Color')}\n` +
+      `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကြေးအမျိုးအစား: Color')}\n` +
       `${EMOJI.INFO} Please select a strategy compatible with color betting.`,
       makeMainKeyboard(true)
     );
   } else {
-    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('Bet Type: Big/Small')}`, makeMainKeyboard(true));
+    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကြေးအမျိုးအစား: Big/Small')}`, makeMainKeyboard(true));
   }
   
   saveUserSettings();
@@ -6219,13 +6221,13 @@ if (data.startsWith("bet_type:")) {
     const gameType = data.split(":")[1];
     
     if (gameType === "WINGO_SELECT") {
-      await sendMessageWithRetry(ctx, `${EMOJI.GAME} ${STYLE.BOLD('Select WINGO Game Type')}`, makeWINGOSelectionKeyboard());
+      await sendMessageWithRetry(ctx, `${EMOJI.GAME} ${STYLE.BOLD('Select WINGO ဂိမ်းအမျိုးအစား')}`, makeWINGOSelectionKeyboard());
       await safeDeleteMessage(ctx);
       return;
     }
     
     userSettings[userId].game_type = gameType;
-    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('Game Type set')}`, makeMainKeyboard(true));
+    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('ဂိမ်းအမျိုးအစား set')}`, makeMainKeyboard(true));
     saveUserSettings();
     await safeDeleteMessage(ctx);
     return;
@@ -6322,12 +6324,12 @@ for (const [platformKey, platform] of Object.entries(PLATFORMS)) {
 } 
   
   // Bet Type Button
-  if (buttonText === `${EMOJI.COLOR} Bet Type`) {
+  if (buttonText === `${EMOJI.COLOR} လောင်းကြေးအမျိုးအစား`) {
     const currentBetType = userSettings[userId]?.bet_type || "BS";
     const typeText = currentBetType === "COLOR" ? "Color" : "Big/Small";
     
     await sendMessageWithRetry(ctx, 
-      `${EMOJI.COLOR} ${STYLE.BOLD('Bet Type Settings')}\n\n` +
+      `${EMOJI.COLOR} ${STYLE.BOLD('လောင်းကြေးအမျိုးအစား Settings')}\n\n` +
       `${EMOJI.INFO} Current: ${STYLE.BOLD(typeText)}\n` +
       `${EMOJI.INFO} Select your preferred betting mode:`, 
       makeBetTypeKeyboard()
@@ -6506,13 +6508,13 @@ for (const [platformKey, platform] of Object.entries(PLATFORMS)) {
   if (isAdmin && rawText.startsWith("/allow ")) { await cmdAllowHandler(ctx); return; }
   if (isAdmin && rawText.startsWith("/remove ")) { await cmdRemoveHandler(ctx); return; }
   if (isAdmin && rawText.startsWith("/send ")) { await cmdSendHandler(ctx); return; } 
-  if (buttonText === `${EMOJI.INFO} Account Info`) {
+  if (buttonText === `${EMOJI.INFO} အချက်အလက်`) {
     await showUserStats(ctx, userId);
     return;
   }
   
-  if (buttonText === `${EMOJI.TARGET} Game Type`) {
-    await sendMessageWithRetry(ctx, `${EMOJI.GAME} Select Game Type:`, makeGameTypeKeyboard());
+  if (buttonText === `${EMOJI.TARGET} ဂိမ်းအမျိုးအစား`) {
+    await sendMessageWithRetry(ctx, `${EMOJI.GAME} Select ဂိမ်းအမျိုးအစား:`, makeGameTypeKeyboard());
     return;
   }
   
@@ -6570,12 +6572,12 @@ if (buttonText === `${EMOJI.BACK} Back`) {
   return;
 }
   
-  if (buttonText === `${EMOJI.RISK} Risk Management`) {
-    await sendMessageWithRetry(ctx, `${EMOJI.RISK} ${STYLE.BOLD('Risk Management')}\n\n${EMOJI.INFO} Configure your betting safety settings below:`, makeRiskManagementSubmenu());
+  if (buttonText === `${EMOJI.RISK} အန္တရာယ်စီမံခန့်ခွဲမှု`) {
+    await sendMessageWithRetry(ctx, `${EMOJI.RISK} ${STYLE.BOLD('အန္တရာယ်စီမံခန့်ခွဲမှု')}\n\n${EMOJI.INFO} Configure your betting safety settings below:`, makeRiskManagementSubmenu());
     return;
   }
   
-  if (buttonText === `${EMOJI.START} Start Bot`) {
+  if (buttonText === `${EMOJI.START} စတင်ကစားမယ်`) {
     console.log(`[USER_ACTIVITY] User ${userName} (ID: ${userId}) started the bot`);
     
     const settings = userSettings[userId] || {};
@@ -6666,7 +6668,7 @@ if (["CYBER_SNIPER", "COLOR_SNIPER", "ULTRA_SNIPER", "CHAOS_SEEKER"].includes(se
     return;
   }
   
-  if (buttonText === `${EMOJI.STOP} Stop Bot`) {
+  if (buttonText === `${EMOJI.STOP} ကစားတာ ရပ်မယ်`) {
     console.log(`[USER_ACTIVITY] User ${userName} (ID: ${userId}) stopped the bot`);
     
     const settings = userSettings[userId] || {};
@@ -6757,23 +6759,23 @@ let balanceText = "";
     return;
   }
   
-  if (buttonText === `${EMOJI.BALANCE} Bet Size`) {
+  if (buttonText === `${EMOJI.BALANCE} လောင်ကြေး သတ်မှတ်`) {
     userState[userId] = { state: "INPUT_BET_SIZES" };
     await sendMessageWithRetry(ctx, `${EMOJI.BALANCE} Enter bet sizes (one per line):\n${STYLE.CODE('100')}\n${STYLE.CODE('200')}\n${STYLE.CODE('500')}`, makeMainKeyboard(true, isAdmin));
     return;
   }
   
-  if (buttonText === `${EMOJI.STRATEGY} Strategy`) {
-    await sendMessageWithRetry(ctx, `${EMOJI.STRATEGY} Choose strategy:`, makeStrategyKeyboard(userId));
+  if (buttonText === `${EMOJI.STRATEGY} နည်းဗျူဟာ`) {
+    await sendMessageWithRetry(ctx, `${EMOJI.STRATEGY} Choose နည်းဗျူဟာ:`, makeStrategyKeyboard(userId));
     return;
   }
   
-  if (buttonText === `${EMOJI.SETTINGS} Betting Settings`) {
+  if (buttonText === `${EMOJI.SETTINGS} လောင်းကစား ဆက်တင်များ`) {
     await sendMessageWithRetry(ctx, `${EMOJI.SETTINGS} Choose Betting Strategy`, makeBettingStrategyKeyboard());
     return;
   }
   
-  if (buttonText === `${EMOJI.GAME} Game Mode`) {
+  if (buttonText === `${EMOJI.GAME} ဂိမ်း မုဒ်`) {
     await sendMessageWithRetry(ctx, `${EMOJI.GAME} Select Mode:`, makeModeSelectionKeyboard());
     return;
   }
@@ -6965,7 +6967,7 @@ if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
     userSettings[userId].martin_index = 0;
     userSettings[userId].custom_index = 0;
     
-    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('BET SIZE set:')} ${betSizes.join(',')} Ks`, makeMainKeyboard(true, isAdmin));
+    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကြေး set:')} ${betSizes.join(',')} Ks`, makeMainKeyboard(true, isAdmin));
     delete userState[userId];
     saveUserSettings();
 } else if (currentState === "INPUT_BS_PATTERN") {
@@ -7090,7 +7092,7 @@ async function showUserStats(ctx, userId) {
   };
   
   const infoText = 
-    `${EMOJI.STATS} *ACCOUNT INFO*\n` +
+    `${EMOJI.STATS} *အကောင့် အချက်အလက်*\n` +
     `${STYLE.SEPARATOR}\n\n` +
     
     `${EMOJI.USER} *USER DETAILS*\n` +
@@ -7132,7 +7134,7 @@ async function showUserStats(ctx, userId) {
 
 // ⚙️ Config
 const BASE_URL = PLATFORMS["CKLOTTERY"].baseUrl;
-const BOT_TOKEN = "8014143080:AAGnzBSeintiA1IcTrepRXn8qNmLW1wlvcQ";
+const BOT_TOKEN = "8346296445:AAHpn8S0WrSm2ugtvDZ6ihUxMWE39JLovmY";
 const ADMIN_ID = 7308292609;
 const IGNORE_SSL = true;
 const WIN_LOSE_CHECK_INTERVAL = 2;
