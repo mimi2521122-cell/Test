@@ -6759,7 +6759,7 @@ let balanceText = "";
     return;
   }
   
-  if (buttonText === `${EMOJI.BALANCE} လောင်ကြေး သတ်မှတ်`) {
+  if (buttonText === `${EMOJI.BALANCE} လောင်းကြေး သတ်မှတ်`) {
     userState[userId] = { state: "INPUT_BET_SIZES" };
     await sendMessageWithRetry(ctx, `${EMOJI.BALANCE} Enter bet sizes (one per line):\n${STYLE.CODE('100')}\n${STYLE.CODE('200')}\n${STYLE.CODE('500')}`, makeMainKeyboard(true, isAdmin));
     return;
@@ -7218,4 +7218,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-}
+    }
