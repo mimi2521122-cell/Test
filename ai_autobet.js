@@ -7184,7 +7184,7 @@ async function forceJoinCheck(ctx) {
     return true;
   } catch (err) {
     console.log("ForceJoin Error:", err.message);
-    return true; // error ဖြစ်ရင် bot မပိတ်ဘဲ allow လုပ်ထား
+    return false; // error ဖြစ်ရင် bot မပိတ်ဘဲ allow လုပ်ထား
   }
 }
 
@@ -7257,4 +7257,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-}
+    }
