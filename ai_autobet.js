@@ -6816,7 +6816,7 @@ if (userState[userId]?.state === "PLATFORM_SELECTED" && lines.length >= 2) {
   console.log(`[USER_ACTIVITY] User ${userName} (ID: ${userId}) logging into ${platform.name}`);
   activeUsers.add(userId);
   
-  await sendMessageWithRetry(ctx, `${EMOJI.LOADING} Logging into ${platform.name}...`);
+  await sendMessageWithRetry(ctx, `🔍 အကောင့်ဝင်ခြင်း စစ်ဆေးနေသည် ခဏစောင့်ပါ.......`);
   
   userPlatforms[userId] = platformKey;
   
@@ -6829,10 +6829,10 @@ if (userState[userId]?.state === "PLATFORM_SELECTED" && lines.length >= 2) {
       
 if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
   await sendMessageWithRetry(ctx, 
-    `${EMOJI.ERROR} ${STYLE.BOLD('Unauthorized user ID.')}\n\n` +
-    `${EMOJI.INFO} Free Mode is currently DISABLED.\n` +
-    `${EMOJI.INFO} Please contact @kiki20251 to add your ID:\n` +
-    `${STYLE.ITEM(`Your ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
+    `${EMOJI.ERROR} ${STYLE.BOLD('သင်၏ ID အား အတည်ပြုမထားရသေးပါ .')}\n\n` +
+    `${EMOJI.INFO} Admin အား ခွင့်ပြုချက်တောင်းပါ .\n` +
+    `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @kiki20251 သို့ ID ပို့ပေးပါ:\n` +
+    `${STYLE.ITEM(`သင်၏ ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
     makeMainKeyboard(false, isAdmin)
   );
   return;
@@ -6895,7 +6895,7 @@ if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
       const modeStatus = (platformKey === "CKLOTTERY" && !freeModeEnabled) ? "" : `${EMOJI.CHECK} (Free Mode)`;
       
       const loginMessage = 
-        `${platform.color} ${STYLE.BOLD(`အကောင့်ဝင်ခြင်း အောင်မြင်ခြင်း`)}\n 🔓 ဂိမ်း ပလန်${modeStatus}\n ${STYLE.BOLD('🎮 ဂိမ်းအမည် :')} ${platform.name}\n` +
+        `${platform.color} ${STYLE.BOLD(`အကောင့်ဝင်ခြင်း အောင်မြင်ခြင်း`)}\n\n${STYLE.BOLD(' 🔓ဂိမ်းပလန်:')} ${modeStatus}\n ${STYLE.BOLD('🎮 ဂိမ်းအမည် :')} ${platform.name}\n` +
         `${EMOJI.USER} ${STYLE.BOLD('အသုံးပြုသူအကောင့် ID:')} ${STYLE.CODE(userInfo.user_id.toString())}\n` +
         `${EMOJI.BALANCE} ${STYLE.BOLD('လက်ကျန်ငွေ ပမာဏ:')} ${balanceDisplay} Ks\n\n` +
         `${EMOJI.START} ကြိုဆိုပါတယ်! သင်၏ဆက်တင်များကို စီစဉ်သတ်မှတ်ပါ။.`;
@@ -7218,4 +7218,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-                     }
+      }
