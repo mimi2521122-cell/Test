@@ -1,4 +1,4 @@
-name: Run Bot Update
+name: Run Bot
 
 on:
   push:
