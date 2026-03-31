@@ -902,7 +902,7 @@ async function placeBetRequest(session, issueNumber, selectType, unitAmount, bet
   betBody.timestamp = Math.floor(Date.now() / 1000);
   
   logging.info(`Bet request details for user ${userId}:`);
-  logging.info(`  ဂိမ်းအမျိုးအစား: ${gameType}, လောင်းကစားအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
+  logging.info(`  ဂိမ်းအခန်းရွေးရန်: ${gameType}, လောင်းကစားအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
   logging.info(`  Issue: ${issueNumber}, SelectType: ${selectType}, Amount: ${unitAmount * betCount}`);
   
   for (let attempt = 0; attempt < MAX_BET_RETRIES; attempt++) {
@@ -5349,7 +5349,7 @@ function makeMainKeyboard(loggedIn = false, isAdmin = false) {
   let keyboard = [
     [`${EMOJI.START} စတင်ကစားမယ်`, `${EMOJI.STOP} ကစားတာ ရပ်မယ်`],
     [`${EMOJI.BALANCE} လောင်းကြေး သတ်မှတ်`, `${EMOJI.COLOR} လောင်းကစားအမျိုးအစား`],
-    [`${EMOJI.TARGET} ဂိမ်းအမျိုးအစား`, `${EMOJI.STRATEGY} နည်းဗျူဟာ`],
+    [`${EMOJI.TARGET} ဂိမ်းအခန်းရွေးရန်`, `${EMOJI.STRATEGY} နည်းဗျူဟာ`],
     [`${EMOJI.SETTINGS} လောင်းကစား ဆက်တင်များ`, `${EMOJI.RISK} အန္တရာယ်စီမံခန့်ခွဲမှု`],
     // AI Mode ခလုတ်ထည့်ရန်
     [`${EMOJI.AI} AI Mode`, `${EMOJI.INFO} အချက်အလက်`, `${EMOJI.LOGOUT} Re-Login`]
@@ -5876,6 +5876,15 @@ async function callbackQueryHandler(ctx) {
   const userId = ctx.from.id;
   const data = ctx.callbackQuery.data;
   
+  if (data === "check_join") {
+  const ok = await forceJoinCheck(ctx);
+  if (ok) {
+    await ctx.reply("✅ Join ပြီးပါပြီ။ Bot ကို အသုံးပြုနိုင်ပါပြီ။");
+    return cmdStartHandler(ctx);
+  }
+  return;
+}
+  
   if (data.startsWith("restart_bot:")) {
     const userIdFromCallback = parseInt(data.split(":")[1]);
     
@@ -6221,13 +6230,13 @@ if (data.startsWith("bet_type:")) {
     const gameType = data.split(":")[1];
     
     if (gameType === "WINGO_SELECT") {
-      await sendMessageWithRetry(ctx, `${EMOJI.GAME} ${STYLE.BOLD('Select WINGO ဂိမ်းအမျိုးအစား')}`, makeWINGOSelectionKeyboard());
+      await sendMessageWithRetry(ctx, `${EMOJI.GAME} ${STYLE.BOLD('Select WINGO ဂိမ်းအခန်းရွေးရန်')}`, makeWINGOSelectionKeyboard());
       await safeDeleteMessage(ctx);
       return;
     }
     
     userSettings[userId].game_type = gameType;
-    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('ဂိမ်းအမျိုးအစား set')}`, makeMainKeyboard(true));
+    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('ဂိမ်းအခန်းရွေးရန် set')}`, makeMainKeyboard(true));
     saveUserSettings();
     await safeDeleteMessage(ctx);
     return;
@@ -6513,8 +6522,8 @@ for (const [platformKey, platform] of Object.entries(PLATFORMS)) {
     return;
   }
   
-  if (buttonText === `${EMOJI.TARGET} ဂိမ်းအမျိုးအစား`) {
-    await sendMessageWithRetry(ctx, `${EMOJI.GAME} Select ဂိမ်းအမျိုးအစား:`, makeGameTypeKeyboard());
+  if (buttonText === `${EMOJI.TARGET} ဂိမ်းအခန်းရွေးရန်`) {
+    await sendMessageWithRetry(ctx, `${EMOJI.GAME} Select ဂိမ်းအခန်းရွေးရန်:`, makeGameTypeKeyboard());
     return;
   }
   
@@ -7136,6 +7145,7 @@ async function showUserStats(ctx, userId) {
 const BASE_URL = PLATFORMS["CKLOTTERY"].baseUrl;
 const BOT_TOKEN = "8346296445:AAHpn8S0WrSm2ugtvDZ6ihUxMWE39JLovmY";
 const ADMIN_ID = 7308292609;
+const FORCE_JOIN_CHANNEL = "@KMM_MOD1";
 const IGNORE_SSL = true;
 const WIN_LOSE_CHECK_INTERVAL = 2;
 const MAX_RESULT_WAIT_TIME = 60;
@@ -7153,6 +7163,30 @@ const DEFAULT_BS_ORDER = "BSBBSBSSSB";
 const SNIPER_NOTIFICATIONS = true;
 const SNIPER_MAX_HITS = 2;
 const SNIPER_MAX_LOSSES = 4;
+
+async function forceJoinCheck(ctx) {
+  try {
+    const userId = ctx.from.id;
+
+    const member = await ctx.telegram.getChatMember(FORCE_JOIN_CHANNEL, userId);
+
+    if (member.status === "left" || member.status === "kicked") {
+      await ctx.reply(
+        `🚫 Bot သုံးရန် Channel Join လုပ်ထားရပါမယ်!\n\n👇 Join လုပ်ပြီး "✅ Joined" ကိုနှိပ်ပါ`,
+        Markup.inlineKeyboard([
+          [Markup.button.url("📢 Join Channel", `https://t.me/${FORCE_JOIN_CHANNEL.replace("@","")}`)],
+          [Markup.button.callback("✅ Joined", "check_join")]
+        ])
+      );
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.log("ForceJoin Error:", err.message);
+    return true; // error ဖြစ်ရင် bot မပိတ်ဘဲ allow လုပ်ထား
+  }
+}
 
 function main() {
   loadAllowedUsers();
@@ -7174,7 +7208,12 @@ function main() {
   console.error(err.stack);
 });
 
-bot.start(cmdStartHandler);
+bot.start(async (ctx) => {
+  const ok = await forceJoinCheck(ctx);
+  if (!ok) return;
+
+  return cmdStartHandler(ctx);
+});
 bot.command('allow', cmdAllowHandler);
 bot.command('remove', cmdRemoveHandler);
 bot.command('showid', cmdShowIdHandler);
@@ -7218,4 +7257,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-    }
+  }
