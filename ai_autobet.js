@@ -207,7 +207,7 @@ function getAIStatusMessage(userId, settings, balance, startBalance) {
   if (riskStatus === "STOP") riskEmoji = "🔴";
   
   return `\n\n🤖 *AI MODE:* ${aiMode.level}\n` +
-         `နည်းဗျူဟာ: ${aiMode.current_strategy || 'N/A'}\n` +
+         `Strategy: ${aiMode.current_strategy || 'N/A'}\n` +
          `Base Bet: ${aiMode.base_bet_percent}%\n` +
          `Risk: ${riskEmoji} ${riskStatus}\n` +
          `Drawdown: ${dd.toFixed(1)}%`;
@@ -217,7 +217,7 @@ function getAIStatusMessage(userId, settings, balance, startBalance) {
 async function aiModeController(userId, ctx, bot, currentBalance) {
   const settings = userSettings[userId];
   if (!settings || !settings.ai_mode || !settings.ai_mode.enabled) {
-    return { shouldProceed: true, betAmount: null, နည်းဗျူဟာ: null };
+    return { shouldProceed: true, betAmount: null, strategy: null };
   }
   
   const aiMode = settings.ai_mode;
@@ -242,7 +242,7 @@ async function aiModeController(userId, ctx, bot, currentBalance) {
       `Advice: Resume after cooldown`,
       { parse_mode: 'Markdown' }
     );
-    return { shouldProceed: false, betAmount: null, နည်းဗျူဟာ: null };
+    return { shouldProceed: false, betAmount: null, strategy: null };
   }
   
   if (riskStatus === "PAUSE") {
@@ -254,11 +254,11 @@ async function aiModeController(userId, ctx, bot, currentBalance) {
       `Resuming in 5 minutes...`,
       { parse_mode: 'Markdown' }
     );
-    return { shouldProceed: false, betAmount: null, နည်းဗျူဟာ: null };
+    return { shouldProceed: false, betAmount: null, strategy: null };
   }
   
   if (aiMode.pause_until && Date.now() < aiMode.pause_until) {
-    return { shouldProceed: false, betAmount: null, နည်းဗျူဟာ: null };
+    return { shouldProceed: false, betAmount: null, strategy: null };
   } else if (aiMode.pause_until) {
     aiMode.pause_until = null;
   }
@@ -267,7 +267,7 @@ async function aiModeController(userId, ctx, bot, currentBalance) {
   if (roundsSinceSwitch >= 10 || !aiMode.current_strategy) {
     aiMode.current_strategy = aiSelectStrategy(userId);
     aiMode.last_switch_round = settings.rounds_played || 0;
-    logging.info(`AI Mode: နည်းဗျူဟာ changed to ${aiMode.current_strategy} for user ${userId}`);
+    logging.info(`AI Mode: Strategy changed to ${aiMode.current_strategy} for user ${userId}`);
   }
   
   const baseBet = aiBaseBet(currentBalance, aiMode.level);
@@ -276,7 +276,7 @@ async function aiModeController(userId, ctx, bot, currentBalance) {
   return { 
     shouldProceed: true, 
     betAmount, 
-    နည်းဗျူဟာ: aiMode.current_strategy 
+    strategy: aiMode.current_strategy 
   };
 }
 
@@ -542,11 +542,11 @@ function calculateBetAmount(settings, currentBalance) {
   const betSizes = settings.bet_sizes || [100];
   const minBetSize = Math.min(...betSizes);
   
-  logging.debug(`Calculating bet amount - နည်းဗျူဟာ: ${bettingStrategy}, Bet Sizes: [${betSizes.join(', ')}]`);
+  logging.debug(`Calculating bet amount - Strategy: ${bettingStrategy}, Bet Sizes: [${betSizes.join(', ')}]`);
   
   if (bettingStrategy === "D'Alembert") {
     if (betSizes.length > 1) {
-      throw new Error("D'Alembert နည်းဗျူဟာ requires only ONE bet size");
+      throw new Error("D'Alembert strategy requires only ONE bet size");
     }
     
     const unitSize = betSizes[0];
@@ -584,7 +584,7 @@ function updateBettingStrategy(settings, isWin, betAmount) {
   const bettingStrategy = settings.betting_strategy || "Martingale";
   const betSizes = settings.bet_sizes || [100];
   
-  logging.debug(`Updating betting strategy - Strategy: ${bettingStrategy}, Result: ${isWin ? 'WIN' : 'LOSS'}, Bet Amount: ${betAmount}`);
+  logging.debug(`Updating betting strategy - Strategy: ${bettingStrategy}, ရလဒ်: ${isWin ? 'WIN' : 'LOSS'}, Bet Amount: ${betAmount}`);
   
   if (bettingStrategy === "Martingale") {
     if (isWin) {
@@ -902,7 +902,7 @@ async function placeBetRequest(session, issueNumber, selectType, unitAmount, bet
   betBody.timestamp = Math.floor(Date.now() / 1000);
   
   logging.info(`Bet request details for user ${userId}:`);
-  logging.info(`  ဂိမ်းအမျိုးအစား: ${gameType}, လောင်းကစားအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
+  logging.info(`  ဂိမ်းအခန်းရွေးရန်: ${gameType}, လောင်းကစားအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
   logging.info(`  Issue: ${issueNumber}, SelectType: ${selectType}, Amount: ${unitAmount * betCount}`);
   
   for (let attempt = 0; attempt < MAX_BET_RETRIES; attempt++) {
@@ -1044,7 +1044,7 @@ async function checkProfitAndStopLoss(userId, bot) {
   const isSniperStrategy = ["CYBER_SNIPER", "COLOR_SNIPER", "ULTRA_SNIPER"].includes(settings.strategy);
   
   if (isSniperStrategy) {
-    logging.info(`Skipping profit/stop-loss check for ${settings.strategy} နည်းဗျူဟာ`);
+    logging.info(`Skipping profit/stop-loss check for ${settings.strategy} strategy`);
     return false;
   }
   
@@ -2146,7 +2146,7 @@ async function handleSniperHit(userId, strategyName, bot, isWin) {
                             `${STYLE.SEPARATOR}\n` +
                             `${STYLE.ITEM(`Hit Count: ${settings.sniper_hit_count}/${SNIPER_MAX_HITS}`)}\n` +
                             `${STYLE.ITEM(`Loss Count: ${settings.sniper_loss_count}/${SNIPER_MAX_LOSSES}`)}\n` +
-                            `${STYLE.LAST_ITEM(`နည်းဗျူဟာ: ${strategyName}`)}`;
+                            `${STYLE.LAST_ITEM(`Strategy: ${strategyName}`)}`;
       
       try {
         await bot.telegram.sendMessage(userId, hitNotification, { parse_mode: 'Markdown' });
@@ -2166,7 +2166,7 @@ async function handleSniperHit(userId, strategyName, bot, isWin) {
                               `${STYLE.SEPARATOR}\n` +
                               `${STYLE.ITEM(`Hit Count: ${settings.sniper_hit_count}/${SNIPER_MAX_HITS}`)}\n` +
                               `${STYLE.ITEM(`Loss Count: ${settings.sniper_loss_count}/${SNIPER_MAX_LOSSES}`)}\n` +
-                              `${STYLE.LAST_ITEM(`နည်းဗျူဟာ: ${strategyName}`)}`;
+                              `${STYLE.LAST_ITEM(`Strategy: ${strategyName}`)}`;
       
       try {
         await bot.telegram.sendMessage(userId, lossNotification, { parse_mode: 'Markdown' });
@@ -2204,7 +2204,7 @@ async function terminateSniperSession(userId, strategyName, bot, isHitTerminatio
   
   const terminationMessage = `${terminationReason}\n` +
                            `${STYLE.SEPARATOR}\n` +
-                           `${STYLE.ITEM(`နည်းဗျူဟာ: ${strategyName}`)}\n` +
+                           `${STYLE.ITEM(`Strategy: ${strategyName}`)}\n` +
                            `${STYLE.ITEM(`Target Hits: ${SNIPER_MAX_HITS}`)}\n` +
                            `${STYLE.ITEM(`Actual Hits: ${settings.sniper_hit_count || 0}`)}\n` +
                            `${STYLE.ITEM(`Max Losses: ${SNIPER_MAX_LOSSES}`)}\n` +
@@ -2238,7 +2238,7 @@ async function sendTerminationImage(userId, bot, strategyName, imageType, hitCou
     
     const caption = `${customMessage}\n` +
                   `${STYLE.SEPARATOR}\n` +
-                  `${STYLE.ITEM(`နည်းဗျူဟာ: ${strategyName}`)}\n` +
+                  `${STYLE.ITEM(`Strategy: ${strategyName}`)}\n` +
                   `${STYLE.ITEM(`Hits: ${hitCount}`)}\n` +
                   `${STYLE.ITEM(`Losses: ${lossCount}`)}\n` +
                   `${STYLE.ITEM(`Balance: ${balance.toFixed(2)} Ks`)}\n` +
@@ -3919,12 +3919,12 @@ if (settings.strategy === "GEMINI_AI") {
 
               if (settings.strategy === "TREND_FOLLOW" && settings.trend_state) {
                 settings.trend_state.last_result = bigSmall;
-                logging.info(`TREND_FOLLOW နည်းဗျူဟာ: Updated last_result to ${bigSmall}`);
+                logging.info(`TREND_FOLLOW strategy: Updated last_result to ${bigSmall}`);
               }
               
               if (betType === "COLOR" && settings.strategy === "TREND_FOLLOW" && settings.color_trend_state) {
                 settings.color_trend_state.last_result = color;
-                logging.info(`Color TREND_FOLLOW နည်းဗျူဟာ: Updated last_result to ${color}`);
+                logging.info(`Color TREND_FOLLOW strategy: Updated last_result to ${color}`);
               }
               
               if (settings.strategy === "ALTERNATE" && settings.alternate_state) {
@@ -3933,11 +3933,11 @@ if (settings.strategy === "GEMINI_AI") {
                 if (settings.alternate_state.skip_mode) {
                   if (isWin) {
                     settings.alternate_state.skip_mode = false;
-                    logging.info(`ALTERNATE နည်းဗျူဟာ: Win in skip mode. Resuming normal betting.`);
+                    logging.info(`ALTERNATE strategy: Win in skip mode. Resuming normal betting.`);
                   }
-                  logging.info(`ALTERNATE နည်းဗျူဟာ: Updated last_result to ${bigSmall} (still in skip mode)`);
+                  logging.info(`ALTERNATE strategy: Updated last_result to ${bigSmall} (still in skip mode)`);
                 } else {
-                  logging.info(`ALTERNATE နည်းဗျူဟာ: Updated last_result to ${bigSmall} (normal mode)`);
+                  logging.info(`ALTERNATE strategy: Updated last_result to ${bigSmall} (normal mode)`);
                 }
               }
               
@@ -4049,9 +4049,9 @@ if (settings.strategy === "GEMINI_AI") {
 
               let resultText;
               if (betType === "COLOR") {
-                resultText = `${EMOJI.RESULT} Result: ${number} → ${getColorName(color)} (${bigSmall === 'B' ? 'Big' : 'Small'})`;
+                resultText = `${EMOJI.RESULT} ရလဒ်: ${number} → ${getColorName(color)} (${bigSmall === 'B' ? 'Big' : 'Small'})`;
               } else {
-                resultText = `${EMOJI.RESULT} Result: ${number} → ${bigSmall === 'B' ? 'Big' : 'Small'}`;
+                resultText = `${EMOJI.RESULT} ရလဒ်: ${number} → ${bigSmall === 'B' ? 'Big' : 'Small'}`;
               }
               
               const gameId = `${EMOJI.GAME} ${escapeMarkdown(gameType)} : ${period}`;
@@ -4062,11 +4062,11 @@ if (settings.strategy === "GEMINI_AI") {
                 const totalProfit = isVirtual 
                   ? (userStats[userId].virtual_balance - (userStats[userId].initial_balance || 0))
                   : (userStats[userId]?.profit || 0);
-                message = `${EMOJI.WIN} ${STYLE.BOLD('VICTORY')} +${winAmount.toFixed(2)} Ks\n` +
+                message = `${EMOJI.WIN} ${STYLE.BOLD('အနိုင်ရရှိသည်')} +${winAmount.toFixed(2)} Ks\n` +
                          `${STYLE.SEPARATOR}\n`+
                          `${gameId}\n` +
                          `${resultText}\n` +
-                         `${EMOJI.BALANCE} Balance: ${currentBalance?.toFixed(2) || '0.00'} Ks\n` +
+                         `${EMOJI.BALANCE} လက်ကျန်ငွေ ${currentBalance?.toFixed(2) || '0.00'} Ks\n` +
                          `${EMOJI.PROFIT} Total Profit: ${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)} Ks`;
               } else {
                 const totalProfit = isVirtual 
@@ -4079,12 +4079,12 @@ if (settings.strategy === "GEMINI_AI") {
                   slStatusLine = `${EMOJI.WARNING} Consecutive Losses: ${consecutiveLosses}/${settings.sl_layer}\n`;
                 }
                 
-                message = `${EMOJI.LOSS} ${STYLE.BOLD('LOSS')} -${amount} Ks\n` +
+                message = `${EMOJI.LOSS} ${STYLE.BOLD('ရှုံးပါတယ်')} -${amount} Ks\n` +
                          `${STYLE.SEPARATOR}\n`+
                          `${gameId}\n` +
                          `${resultText}\n` +
                          `${slStatusLine}` +
-                         `${EMOJI.BALANCE} Balance: ${currentBalance?.toFixed(2) || '0.00'} Ks\n` +
+                         `${EMOJI.BALANCE} လက်ကျန်ငွေ: ${currentBalance?.toFixed(2) || '0.00'} Ks\n` +
                          `${EMOJI.LOSS_ICON} Total Profit: ${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)} Ks`;
               }
               
@@ -4184,15 +4184,15 @@ if (settings.strategy === "GEMINI_AI") {
                 if (settings.trend_state.skip_mode) {
                   if (isWin) {
                     settings.trend_state.skip_mode = false;
-                    logging.info(`TREND_FOLLOW နည်းဗျူဟာ: Win in skip mode. Resuming normal betting.`);
+                    logging.info(`TREND_FOLLOW strategy: Win in skip mode. Resuming normal betting.`);
                   }
-                  logging.info(`TREND_FOLLOW နည်းဗျူဟာ: Updated last_result to ${bigSmall}`);
+                  logging.info(`TREND_FOLLOW strategy: Updated last_result to ${bigSmall}`);
                 }
               }
               
               if (betType === "COLOR" && settings.strategy === "TREND_FOLLOW" && settings.color_trend_state) {
                 settings.color_trend_state.last_result = color;
-                logging.info(`Color TREND_FOLLOW နည်းဗျူဟာ: Updated last_result to ${color}`);
+                logging.info(`Color TREND_FOLLOW strategy: Updated last_result to ${color}`);
               }
               
               if (settings.strategy === "ALTERNATE" && settings.alternate_state) {
@@ -4201,11 +4201,11 @@ if (settings.strategy === "GEMINI_AI") {
                 if (settings.alternate_state.skip_mode) {
                   if (isWin) {
                     settings.alternate_state.skip_mode = false;
-                    logging.info(`ALTERNATE နည်းဗျူဟာ: Win in skip mode. Resuming normal betting.`);
+                    logging.info(`ALTERNATE strategy: Win in skip mode. Resuming normal betting.`);
                   }
-                  logging.info(`ALTERNATE နည်းဗျူဟာ: Updated last_result to ${bigSmall} (still in skip mode)`);
+                  logging.info(`ALTERNATE strategy: Updated last_result to ${bigSmall} (still in skip mode)`);
                 } else {
-                  logging.info(`ALTERNATE နည်းဗျူဟာ: Updated last_result to ${bigSmall} (normal mode)`);
+                  logging.info(`ALTERNATE strategy: Updated last_result to ${bigSmall} (normal mode)`);
                 }
               }
               
@@ -4268,9 +4268,9 @@ if (settings.strategy === "GEMINI_AI") {
               
               let resultText;
               if (betType === "COLOR") {
-                resultText = `${EMOJI.RESULT} Result: ${number} → ${getColorName(color)} (${bigSmall === 'B' ? 'Big' : 'Small'})`;
+                resultText = `${EMOJI.RESULT} ရလဒ်: ${number} → ${getColorName(color)} (${bigSmall === 'B' ? 'Big' : 'Small'})`;
               } else {
-                resultText = `${EMOJI.RESULT} Result: ${number} → ${bigSmall === 'B' ? 'Big' : 'Small'}`;
+                resultText = `${EMOJI.RESULT} ရလဒ်: ${number} → ${bigSmall === 'B' ? 'Big' : 'Small'}`;
               }
               
               const gameId = `${EMOJI.GAME} ${escapeMarkdown(gameType)} : ${period}`;
@@ -4557,14 +4557,14 @@ if (["CYBER_SNIPER", "COLOR_SNIPER", "ULTRA_SNIPER", "CHAOS_SEEKER"].includes(se
       last_result: null,
       skip_mode: false
     };
-    logging.info(`TREND_FOLLOW နည်းဗျူဟာ initialized for user ${userId}`);
+    logging.info(`TREND_FOLLOW strategy initialized for user ${userId}`);
   }
   
   if (betType === "COLOR" && settings.strategy === "TREND_FOLLOW") {
     settings.color_trend_state = {
       last_result: null
     };
-    logging.info(`Color TREND_FOLLOW နည်းဗျူဟာ initialized for user ${userId}`);
+    logging.info(`Color TREND_FOLLOW strategy initialized for user ${userId}`);
   }
   
   if (settings.strategy === "ALTERNATE") {
@@ -4572,7 +4572,7 @@ if (["CYBER_SNIPER", "COLOR_SNIPER", "ULTRA_SNIPER", "CHAOS_SEEKER"].includes(se
       last_result: null,
       skip_mode: false
     };
-    logging.info(`ALTERNATE နည်းဗျူဟာ initialized for user ${userId}`);
+    logging.info(`ALTERNATE strategy initialized for user ${userId}`);
   }
   
   if (settings.strategy === "BS_ORDER") {
@@ -4601,13 +4601,13 @@ if (["CYBER_SNIPER", "COLOR_SNIPER", "ULTRA_SNIPER", "CHAOS_SEEKER"].includes(se
     const firstBet = pattern && pattern.length > 0 ? pattern[0] : 'B';
     
     await sendMessageWithRetry(ctx, 
-      `${EMOJI.PATTERN} ${STYLE.BOLD('BS ORDER နည်းဗျူဟာ Active')}\n` +
+      `${EMOJI.PATTERN} ${STYLE.BOLD('BS ORDER Strategy Active')}\n` +
       `${STYLE.ITEM(`Pattern: ${pattern}`)}\n` +
       `${STYLE.ITEM(`Length: ${pattern.length}`)}\n` +
       `${STYLE.LAST_ITEM(`First bet will be: ${firstBet === 'B' ? 'BIG' : 'SMALL'}`)}`
     );
     
-    logging.info(`BS_ORDER နည်းဗျူဟာ initialized for user ${userId}, Pattern: ${settings.pattern}, Index: 0`);
+    logging.info(`BS_ORDER strategy initialized for user ${userId}, Pattern: ${settings.pattern}, Index: 0`);
   }
   
   if (!userLastResults[userId]) {
@@ -4686,13 +4686,13 @@ if (["CYBER_SNIPER", "COLOR_SNIPER", "ULTRA_SNIPER", "CHAOS_SEEKER"].includes(se
   const gameType = settings.game_type || "TRX";
 
   const startMessage = 
-    `${EMOJI.START} *BOT ACTIVATED*\n` +
+    `${EMOJI.START} *Bot စတင်အလုပ်လုပ်ပြီ*\n` +
     `${STYLE.SEPARATOR}\n\n` +
-    `${EMOJI.BALANCE} Balance: ${currentBalance} Ks\n\n` +
-    `${EMOJI.GAME} Game: ${safeEscape(gameType)}\n` +
-    `${EMOJI.MODE} Type: ${betType === "COLOR" ? "Color" : "Big/Small"}\n` +
+    `${EMOJI.BALANCE} လက်ကျန်ငွေ : ${currentBalance} Ks\n\n` +
+    `${EMOJI.GAME} ဂိမ်း: ${safeEscape(gameType)}\n` +
+    `${EMOJI.MODE} အမျိုးအစား: ${betType === "COLOR" ? "Color" : "Big/Small"}\n` +
     `${EMOJI.STRATEGY} နည်းဗျူဟာ: ${(strategyText)}\n` +
-    `${EMOJI.SETTINGS} Mode: ${safeEscape(bettingStrategyText)}\n\n` +
+    `${EMOJI.SETTINGS} မုဒ်: ${safeEscape(bettingStrategyText)}\n\n` +
     `${EMOJI.TARGET} Target: ${safeEscape(profitTargetText)}\n` +
     `${EMOJI.STOP} Stop Loss: ${safeEscape(stopLossText)}\n\n` +
     `${STYLE.SEPARATOR}\n` +
@@ -5128,7 +5128,7 @@ else if (settings.strategy === "GEMINI_AI") {
           betChoiceText = ch === 'B' ? `BIG` : `SMALL`;
         }
         
-        let betMsg = `${EMOJI.SKIP} SKIPPING\n\n${safeEscape(gameId)}\n${EMOJI.STRATEGY} နည်းဗျူဟာ: ${(strategyText)}`;
+        let betMsg = `${EMOJI.SKIP} SKIPPING\n\n${safeEscape(gameId)}\n${EMOJI.STRATEGY} Strategy: ${(strategyText)}`;
         
         if (!userSkippedBets[userId]) {
           userSkippedBets[userId] = {};
@@ -5200,7 +5200,7 @@ try {
           patternInfo = ` (Pattern Index: ${currentIndex})`;
         }
         
-        let betMsg = `${safeEscape(gameId)}\n${betEmoji} Order: ${safeEscape(betChoiceText)} → ${actualAmount} Ks\n${EMOJI.STRATEGY} နည်းဗျူဟာ: ${safeEscape(strategyText)}`;
+        let betMsg = `${safeEscape(gameId)}\n${betEmoji} ရွေးချယ်မှု : ${safeEscape(betChoiceText)} \n💵 ထိုးကြေး : ${actualAmount} Ks\n${EMOJI.STRATEGY} နည်းဗျူဟာ: ${safeEscape(strategyText)}`;
         
         await sendMessageWithRetry(ctx, betMsg);
         
@@ -5347,12 +5347,12 @@ function makeMainKeyboard(loggedIn = false, isAdmin = false) {
   }
   
   let keyboard = [
-    [`${EMOJI.START} စတင် ကစားမယ်`, `${EMOJI.STOP} ကစားတာ ရပ်မယ်`],
-    [`${EMOJI.BALANCE} Bet Size`, `${EMOJI.GAME} Game Mode`],
-    [`${EMOJI.TARGET} ဂိမ်းအမျိုးအစား`, `${EMOJI.COLOR} လောင်းကစားအမျိုးအစား`, `${EMOJI.STRATEGY} နည်းဗျူဟာ`],
-    [`${EMOJI.SETTINGS} လောင်းကစား ဆက်တင်များ`, `${EMOJI.RISK} Risk Management`],
+    [`${EMOJI.START} စတင်ကစားမယ်`, `${EMOJI.STOP} ကစားတာ ရပ်မယ်`],
+    [`${EMOJI.BALANCE} လောင်းကြေး သတ်မှတ်`, `${EMOJI.COLOR} လောင်းကစားအမျိုးအစား`],
+    [`${EMOJI.TARGET} ဂိမ်းအခန်းရွေးရန်`, `${EMOJI.STRATEGY} နည်းဗျူဟာ`],
+    [`${EMOJI.SETTINGS} လောင်းကစား ဆက်တင်များ`, `${EMOJI.RISK} အန္တရာယ်စီမံခန့်ခွဲမှု`],
     // AI Mode ခလုတ်ထည့်ရန်
-    [`${EMOJI.AI} AI Mode`, `${EMOJI.INFO} Account Info`, `${EMOJI.LOGOUT} Re-Login`]
+    [`${EMOJI.AI} AI Mode`, `${EMOJI.INFO} အချက်အလက်`, `${EMOJI.LOGOUT} Re-Login`]
   ];
   
   if (isAdmin) {
@@ -5394,10 +5394,10 @@ function makeStrategyKeyboard(userId = null) {
   if (userId && userSettings[userId] && userSettings[userId].bet_type === "COLOR") {
     const keyboard = [
       [
-        Markup.button.callback(`${EMOJI.TREND} TREND_FOLLOW`, "နည်းဗျူဟာ:TREND_FOLLOW")
+        Markup.button.callback(`${EMOJI.TREND} TREND_FOLLOW`, "strategy:TREND_FOLLOW")
       ],
       [
-        Markup.button.callback(`🎯 COLOR SNIPER`, "နည်းဗျူဟာ:COLOR_SNIPER")
+        Markup.button.callback(`🎯 COLOR SNIPER`, "strategy:COLOR_SNIPER")
       ]
     ];
     return Markup.inlineKeyboard(keyboard);
@@ -5405,44 +5405,44 @@ function makeStrategyKeyboard(userId = null) {
 
   const keyboard = [
     [
-      Markup.button.callback(`${EMOJI.TREND} TREND_FOLLOW`, "နည်းဗျူဟာ:TREND_FOLLOW") , 
+      Markup.button.callback(`${EMOJI.TREND} TREND_FOLLOW`, "strategy:TREND_FOLLOW") , 
       Markup.button.callback(`${EMOJI.ALTERNATE} ALTERNATE`, "strategy:ALTERNATE")
     ],
     [
-      Markup.button.callback(`${EMOJI.PATTERN} BS ORDER`, "နည်းဗျူဟာ:BS_ORDER") , 
-      Markup.button.callback(`🤖 CYBER_SNIPER`, "နည်းဗျူဟာ:CYBER_SNIPER")
+      Markup.button.callback(`${EMOJI.PATTERN} BS ORDER`, "strategy:BS_ORDER") , 
+      Markup.button.callback(`🤖 CYBER_SNIPER`, "strategy:CYBER_SNIPER")
     ],
     [
-      Markup.button.callback(`🔮 QUANTUM_CALC`, "နည်းဗျူဟာ:QUANTUM_CALC") ,       
-      Markup.button.callback(`⏳ TIME_WARP`, "နည်းဗျူဟာ:TIME_WARP")
+      Markup.button.callback(`🔮 QUANTUM_CALC`, "strategy:QUANTUM_CALC") ,       
+      Markup.button.callback(`⏳ TIME_WARP`, "strategy:TIME_WARP")
     ],
     [
-      Markup.button.callback(`💥 ULTRA_SNIPER`, "နည်းဗျူဟာ:ULTRA_SNIPER"),
-      Markup.button.callback(`🌪️ CHAOS_SEEKER`, "နည်းဗျူဟာ:CHAOS_SEEKER")
+      Markup.button.callback(`💥 ULTRA_SNIPER`, "strategy:ULTRA_SNIPER"),
+      Markup.button.callback(`🌪️ CHAOS_SEEKER`, "strategy:CHAOS_SEEKER")
     ],
     [
-      Markup.button.callback(`🎯 TERMINATOR`, "နည်းဗျူဟာ:TERMINATOR"),
-      Markup.button.callback(`⚡ NEURAL_NET`, "နည်းဗျူဟာ:NEURAL_NET")
+      Markup.button.callback(`🎯 TERMINATOR`, "strategy:TERMINATOR"),
+      Markup.button.callback(`⚡ NEURAL_NET`, "strategy:NEURAL_NET")
     ],
     [
-      Markup.button.callback(`🔥 PYRO_TECH`, "နည်းဗျူဟာ:PYRO_TECH"),
-      Markup.button.callback(`🌊 TSUNAMI`, "နည်းဗျူဟာ:TSUNAMI")
+      Markup.button.callback(`🔥 PYRO_TECH`, "strategy:PYRO_TECH"),
+      Markup.button.callback(`🌊 TSUNAMI`, "strategy:TSUNAMI")
     ],
     [
-      Markup.button.callback(`🧙 MAGE`, "နည်းဗျူဟာ:MAGE"),
-      Markup.button.callback(`💀 REAPER`, "နည်းဗျူဟာ:REAPER")
+      Markup.button.callback(`🧙 MAGE`, "strategy:MAGE"),
+      Markup.button.callback(`💀 REAPER`, "strategy:REAPER")
     ],
     [
-      Markup.button.callback(`🔮 DEEPSEEK_PREDICTOR`, "နည်းဗျူဟာ:DEEPSEEK_PREDICTOR"),
-      Markup.button.callback(`🧠 DEEPSEEK_NEURAL`, "နည်းဗျူဟာ:DEEPSEEK_NEURAL")
+      Markup.button.callback(`🔮 DEEPSEEK_PREDICTOR`, "strategy:DEEPSEEK_PREDICTOR"),
+      Markup.button.callback(`🧠 DEEPSEEK_NEURAL`, "strategy:DEEPSEEK_NEURAL")
     ],
     [
-      Markup.button.callback(`⚙️ DEEPSEEK_ADAPTIVE`, "နည်းဗျူဟာ:DEEPSEEK_ADAPTIVE")
+      Markup.button.callback(`⚙️ DEEPSEEK_ADAPTIVE`, "strategy:DEEPSEEK_ADAPTIVE")
     ],
     [
-      Markup.button.callback(`🧠 GPT ADAPTIVE AI`, "နည်းဗျူဟာ:GPT_ADAPTIVE_AI"),
-      Markup.button.callback(`🧠 GROK AI`, "နည်းဗျူဟာ:GROK_AI"),
-      Markup.button.callback(`✨ GEMINI AI`, "နည်းဗျူဟာ:GEMINI_AI")
+      Markup.button.callback(`🧠 GPT ADAPTIVE AI`, "strategy:GPT_ADAPTIVE_AI"),
+      Markup.button.callback(`🧠 GROK AI`, "strategy:GROK_AI"),
+      Markup.button.callback(`✨ GEMINI AI`, "strategy:GEMINI_AI")
     ]
   ];
   
@@ -5531,7 +5531,7 @@ async function checkUserAuthorized(ctx) {
     const platformKey = userPlatforms[userId] || "CKLOTTERY";
     userSettings[userId] = {
       platform: platformKey,
-      နည်းဗျူဟာ: "TREND_FOLLOW",
+      strategy: "TREND_FOLLOW",
       betting_strategy: "Martingale",
       game_type: platformKey === "CKLOTTERY" ? "TRX" : "WINGO",
       bet_type: "BS",
@@ -5580,7 +5580,7 @@ async function cmdStartHandler(ctx) {
   
   if (!userSettings[userId]) {
     userSettings[userId] = {
-      နည်းဗျူဟာ: "TREND_FOLLOW",
+      strategy: "TREND_FOLLOW",
       betting_strategy: "Martingale",
       game_type: "TRX", 
       bet_type: "BS", 
@@ -5646,6 +5646,8 @@ async function cmdStartHandler(ctx) {
  🎮 Games: TRX & WINGO
  🧠 Logic: 12+ Pro Strategies
  🤖 AI Mode: Smart Auto-Trading
+ ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
+ https://www.777bigwingame.co/#/register?invitationCode=84318565611
 ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
 
 ${loggedIn ? '⚡️ System Ready! Choose an option 👇' : '🔐 Please Login to connect system 👇'}`;
@@ -5991,7 +5993,7 @@ if (["CYBER_SNIPER", "COLOR_SNIPER", "ULTRA_SNIPER", "CHAOS_SEEKER"].includes(se
         settings.ai_mode.enabled = true;
         await sendMessageWithRetry(ctx, 
           `✅ *AI Mode ENABLED*\n\n` +
-          `AI will now automatically manage your နည်းဗျူဟာ and bets.\n` +
+          `AI will now automatically manage your strategy and bets.\n` +
           `Level: ${settings.ai_mode.level}\n` +
           `Base Bet: ${settings.ai_mode.base_bet_percent}%`,
           makeMainKeyboard(true, userId === ADMIN_ID)
@@ -6091,57 +6093,57 @@ if (["CYBER_SNIPER", "COLOR_SNIPER", "ULTRA_SNIPER", "CHAOS_SEEKER"].includes(se
     return;
   }
   
-  if (data.startsWith("နည်းဗျူဟာ:")) {
-    const နည်းဗျူဟာ = data.split(":")[1];
-    userSettings[userId].strategy = နည်းဗျူဟာ;
+  if (data.startsWith("strategy:")) {
+    const strategy = data.split(":")[1];
+    userSettings[userId].strategy = strategy;
     
-    if (နည်းဗျူဟာ === "BS_ORDER") {
+    if (strategy === "BS_ORDER") {
       userState[userId] = { state: "INPUT_BS_PATTERN" };
       await sendMessageWithRetry(ctx, `${EMOJI.PATTERN} ${STYLE.BOLD('BS Pattern Settings')}\n\n${EMOJI.INFO} Please enter your BS pattern (B and S only):\n\n${STYLE.CODE('Example: BSBSSBBS')}`);
-    } else if (နည်းဗျူဟာ === "TREND_FOLLOW") {
+    } else if (strategy === "TREND_FOLLOW") {
       const betType = userSettings[userId].bet_type || "BS";
       if (betType === "COLOR") {
-        await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('နည်းဗျူဟာ: Trend Follow (Color Mode)')}`, makeMainKeyboard(true));
+        await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('Strategy: Trend Follow (Color Mode)')}`, makeMainKeyboard(true));
       } else {
         await sendMessageWithRetry(ctx, `${EMOJI.TREND} ${STYLE.BOLD('Trend Follow Settings')}\n\n${EMOJI.INFO} Select BS/SB Wait Count:`, makeBSWaitCountKeyboard());
       }
-    } else if (နည်းဗျူဟာ === "ALTERNATE") {
+    } else if (strategy === "ALTERNATE") {
       await sendMessageWithRetry(ctx, `${EMOJI.ALTERNATE} ${STYLE.BOLD('Alternate Settings')}\n\n${EMOJI.INFO} Select BB/SS Wait Count:`, makeBBWaitCountKeyboard());
-    } else if (နည်းဗျူဟာ === "CYBER_SNIPER") {
+    } else if (strategy === "CYBER_SNIPER") {
       await sendMessageWithRetry(ctx, `🤖 ${STYLE.BOLD('CYBER_SNIPER Activated')}\n\n${EMOJI.INFO} • Session terminates after ${SNIPER_MAX_HITS} hits`, makeMainKeyboard(true));
-    } else if (နည်းဗျူဟာ === "COLOR_SNIPER") {
+    } else if (strategy === "COLOR_SNIPER") {
       await sendMessageWithRetry(ctx, `🎯 ${STYLE.BOLD('COLOR_SNIPER Activated')}\n\n${EMOJI.INFO} • Session terminates after ${SNIPER_MAX_HITS} hits`, makeMainKeyboard(true));
-    } else if (နည်းဗျူဟာ === "QUANTUM_CALC") {
+    } else if (strategy === "QUANTUM_CALC") {
       await sendMessageWithRetry(ctx, `🔮 ${STYLE.BOLD('QUANTUM_CALC Activated')}`, makeMainKeyboard(true));
-    } else if (နည်းဗျူဟာ === "TIME_WARP") {
+    } else if (strategy === "TIME_WARP") {
       await sendMessageWithRetry(ctx, `⏳ ${STYLE.BOLD('TIME_WARP Activated')}`, makeMainKeyboard(true));
-    } else if (နည်းဗျူဟာ === "ULTRA_SNIPER") {
+    } else if (strategy === "ULTRA_SNIPER") {
   await sendMessageWithRetry(ctx, `💀 ${STYLE.BOLD('ULTRA_SNIPER Activated')}\n\n${EMOJI.INFO} • Session terminates after max 3 consecutive bets`, makeMainKeyboard(true));
-} else if (နည်းဗျူဟာ === "CHAOS_SEEKER") {
+} else if (strategy === "CHAOS_SEEKER") {
   await sendMessageWithRetry(ctx, `🌪️ ${STYLE.BOLD('CHAOS_SEEKER Activated')}\n\n${EMOJI.INFO} • Multiplier increases on loss (max 5x)`, makeMainKeyboard(true));
-} else if (နည်းဗျူဟာ === "TERMINATOR") {
+} else if (strategy === "TERMINATOR") {
   await sendMessageWithRetry(ctx, `🎯 ${STYLE.BOLD('TERMINATOR Activated')}\n\n${EMOJI.INFO} • Bets against 3-in-a-row patterns\n${EMOJI.INFO} • 5 loss limit`, makeMainKeyboard(true));
-} else if (နည်းဗျူဟာ === "NEURAL_NET") {
+} else if (strategy === "NEURAL_NET") {
   await sendMessageWithRetry(ctx, `⚡ ${STYLE.BOLD('NEURAL_NET Activated')}\n\n${EMOJI.INFO} • Analyzes pattern frequencies\n${EMOJI.INFO} • Requires 10+ results`, makeMainKeyboard(true));
-} else if (နည်းဗျူဟာ === "PYRO_TECH") {
+} else if (strategy === "PYRO_TECH") {
   await sendMessageWithRetry(ctx, `🔥 ${STYLE.BOLD('PYRO_TECH Activated')}\n\n${EMOJI.INFO} • 2-bet sequence after 0 or 9\n${EMOJI.INFO} • Win = double next bet`, makeMainKeyboard(true));
-} else if (နည်းဗျူဟာ === "TSUNAMI") {
+} else if (strategy === "TSUNAMI") {
   await sendMessageWithRetry(ctx, `🌊 ${STYLE.BOLD('TSUNAMI Activated')}\n\n${EMOJI.INFO} • Bets against 3/4 same results\n${EMOJI.INFO} • Dynamic bet sizing`, makeMainKeyboard(true));
-} else if (နည်းဗျူဟာ === "MAGE") {
+} else if (strategy === "MAGE") {
   await sendMessageWithRetry(ctx, `🧙 ${STYLE.BOLD('MAGE Activated')}\n\n${EMOJI.INFO} • Uses number sum magic\n${EMOJI.INFO} • Last 3 numbers → sum → predict`, makeMainKeyboard(true));
-} else if (နည်းဗျူဟာ === "REAPER") {
+} else if (strategy === "REAPER") {
   await sendMessageWithRetry(ctx, `💀 ${STYLE.BOLD('REAPER Activated')}\n\n${EMOJI.INFO} • Follows 2-result patterns\n${EMOJI.INFO} • 1.5x progressive betting`, makeMainKeyboard(true));
-}   else if (နည်းဗျူဟာ === "DEEPSEEK_PREDICTOR") {
+}   else if (strategy === "DEEPSEEK_PREDICTOR") {
     await sendMessageWithRetry(ctx, `🔮 ${STYLE.BOLD('DEEPSEEK PREDICTOR Activated')}\n\n${EMOJI.INFO} • Detects common patterns (BBB, BSB, etc.)\n${EMOJI.INFO} • Predicts based on historical probability\n${EMOJI.INFO} • Requires 6+ results for optimal performance`, makeMainKeyboard(true));
-  } else if (နည်းဗျူဟာ === "DEEPSEEK_NEURAL") {
+  } else if (strategy === "DEEPSEEK_NEURAL") {
     await sendMessageWithRetry(ctx, `🧠 ${STYLE.BOLD('DEEPSEEK NEURAL Activated')}\n\n${EMOJI.INFO} • Analyzes trend strength and volatility\n${EMOJI.INFO} • Follows strong trends, reverts in high volatility\n${EMOJI.INFO} • Requires 10+ results for accurate trend analysis`, makeMainKeyboard(true));
-  } else if (နည်းဗျူဟာ === "DEEPSEEK_ADAPTIVE") {
+  } else if (strategy === "DEEPSEEK_ADAPTIVE") {
     await sendMessageWithRetry(ctx, `⚙️ ${STYLE.BOLD('DEEPSEEK ADAPTIVE AI Activated')}\n\n${EMOJI.INFO} • Aggression level changes based on win/loss streak\n${EMOJI.INFO} • Aggressive on wins, conservative on losses\n${EMOJI.INFO} • Learns and adapts to market conditions`, makeMainKeyboard(true));
   }
-else if (နည်းဗျူဟာ === "GPT_ADAPTIVE_AI") {
+else if (strategy === "GPT_ADAPTIVE_AI") {
       await sendMessageWithRetry(ctx, `🧠 ${STYLE.BOLD('GPT ADAPTIVE AI Activated')}\n\n${EMOJI.INFO} • Analyzes last 10 results\n${EMOJI.INFO} • Uses ChatGPT-style scoring\n${EMOJI.INFO} • Skips if streak ≥4 & low confidence`, makeMainKeyboard(true));
     }
-    else if (နည်းဗျူဟာ === "GROK_AI") {
+    else if (strategy === "GROK_AI") {
   await sendMessageWithRetry(ctx, 
     `🧠 ${STYLE.BOLD('GROK AI Activated')}\n\n` +
     `${EMOJI.INFO} • xAI Multi-Factor Analysis\n` +
@@ -6151,7 +6153,7 @@ else if (နည်းဗျူဟာ === "GPT_ADAPTIVE_AI") {
     makeMainKeyboard(true)
   );
 }
-    else if (နည်းဗျူဟာ === "GEMINI_AI") {
+    else if (strategy === "GEMINI_AI") {
   await sendMessageWithRetry(ctx, `✨ ${STYLE.BOLD('GEMINI AI Activated')}\n\n${EMOJI.INFO} • Smart Pattern Recognition\n${EMOJI.INFO} • Auto-Skips unstable patterns\n${EMOJI.INFO} • Adapts to market momentum`, makeMainKeyboard(true));
 }
 
@@ -6168,7 +6170,7 @@ if (data.startsWith("bet_type:")) {
 
     await sendMessageWithRetry(ctx, 
       `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကစားအမျိုးအစား: Color')}\n` +
-      `${EMOJI.INFO} Please select a နည်းဗျူဟာ compatible with color betting.`,
+      `${EMOJI.INFO} Please select a strategy compatible with color betting.`,
       makeMainKeyboard(true)
     );
   } else {
@@ -6209,7 +6211,7 @@ if (data.startsWith("bet_type:")) {
     userSettings[userId].skip_betting = false;
     userSettings[userId].custom_index = 0;
     
-    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('Betting နည်းဗျူဟာ:')} ${bettingStrategy}`, makeMainKeyboard(true));
+    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('Betting Strategy:')} ${bettingStrategy}`, makeMainKeyboard(true));
     saveUserSettings();
     await safeDeleteMessage(ctx);
     return;
@@ -6219,13 +6221,13 @@ if (data.startsWith("bet_type:")) {
     const gameType = data.split(":")[1];
     
     if (gameType === "WINGO_SELECT") {
-      await sendMessageWithRetry(ctx, `${EMOJI.GAME} ${STYLE.BOLD('WINGO ဂိမ်းအမျိုးအစားရွေးပါ')}`, makeWINGOSelectionKeyboard());
+      await sendMessageWithRetry(ctx, `${EMOJI.GAME} ${STYLE.BOLD('Select WINGO ဂိမ်းအခန်းရွေးရန်')}`, makeWINGOSelectionKeyboard());
       await safeDeleteMessage(ctx);
       return;
     }
     
     userSettings[userId].game_type = gameType;
-    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('ဂိမ်းအမျိုးအစား ရွေးချယ်မှု')}`, makeMainKeyboard(true));
+    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('ဂိမ်းအခန်းရွေးရန် set')}`, makeMainKeyboard(true));
     saveUserSettings();
     await safeDeleteMessage(ctx);
     return;
@@ -6506,13 +6508,13 @@ for (const [platformKey, platform] of Object.entries(PLATFORMS)) {
   if (isAdmin && rawText.startsWith("/allow ")) { await cmdAllowHandler(ctx); return; }
   if (isAdmin && rawText.startsWith("/remove ")) { await cmdRemoveHandler(ctx); return; }
   if (isAdmin && rawText.startsWith("/send ")) { await cmdSendHandler(ctx); return; } 
-  if (buttonText === `${EMOJI.INFO} Account Info`) {
+  if (buttonText === `${EMOJI.INFO} အချက်အလက်`) {
     await showUserStats(ctx, userId);
     return;
   }
   
-  if (buttonText === `${EMOJI.TARGET} ဂိမ်းအမျိုးအစား`) {
-    await sendMessageWithRetry(ctx, `${EMOJI.GAME}  ဂိမ်းအမျိုးအစား:ရွေးချယ်မှု`, makeGameTypeKeyboard());
+  if (buttonText === `${EMOJI.TARGET} ဂိမ်းအခန်းရွေးရန်`) {
+    await sendMessageWithRetry(ctx, `${EMOJI.GAME} Select ဂိမ်းအခန်းရွေးရန်:`, makeGameTypeKeyboard());
     return;
   }
   
@@ -6570,12 +6572,12 @@ if (buttonText === `${EMOJI.BACK} Back`) {
   return;
 }
   
-  if (buttonText === `${EMOJI.RISK} Risk Management`) {
-    await sendMessageWithRetry(ctx, `${EMOJI.RISK} ${STYLE.BOLD('Risk Management')}\n\n${EMOJI.INFO} Configure your betting safety settings below:`, makeRiskManagementSubmenu());
+  if (buttonText === `${EMOJI.RISK} အန္တရာယ်စီမံခန့်ခွဲမှု`) {
+    await sendMessageWithRetry(ctx, `${EMOJI.RISK} ${STYLE.BOLD('အန္တရာယ်စီမံခန့်ခွဲမှု')}\n\n${EMOJI.INFO} Configure your betting safety settings below:`, makeRiskManagementSubmenu());
     return;
   }
   
-  if (buttonText === `${EMOJI.START} စတင် ကစားမယ်`) {
+  if (buttonText === `${EMOJI.START} စတင်ကစားမယ်`) {
     console.log(`[USER_ACTIVITY] User ${userName} (ID: ${userId}) started the bot`);
     
     const settings = userSettings[userId] || {};
@@ -6757,9 +6759,9 @@ let balanceText = "";
     return;
   }
   
-  if (buttonText === `${EMOJI.BALANCE} Bet Size`) {
+  if (buttonText === `${EMOJI.BALANCE} လောင်းကြေး သတ်မှတ်`) {
     userState[userId] = { state: "INPUT_BET_SIZES" };
-    await sendMessageWithRetry(ctx, `${EMOJI.BALANCE} Enter bet sizes (one per line):\n${STYLE.CODE('100')}\n${STYLE.CODE('200')}\n${STYLE.CODE('500')}`, makeMainKeyboard(true, isAdmin));
+    await sendMessageWithRetry(ctx, `${EMOJI.BALANCE} လောင်းကြေးထိုးရန် ထိုးငွေ ပမာဏ ပို့ပါ (တစ်ကြိမ်သာ ပို့ပါ):\n${STYLE.CODE('100')}\n${STYLE.CODE('200')}\n${STYLE.CODE('500')}`, makeMainKeyboard(true, isAdmin));
     return;
   }
   
@@ -6769,11 +6771,11 @@ let balanceText = "";
   }
   
   if (buttonText === `${EMOJI.SETTINGS} လောင်းကစား ဆက်တင်များ`) {
-    await sendMessageWithRetry(ctx, `${EMOJI.SETTINGS} လောင်းကစားနည်းဗျူဟာကို ရွေးချယ်ပါ။`, makeBettingStrategyKeyboard());
+    await sendMessageWithRetry(ctx, `${EMOJI.SETTINGS} Choose Betting Strategy`, makeBettingStrategyKeyboard());
     return;
   }
   
-  if (buttonText === `${EMOJI.GAME} Game Mode`) {
+  if (buttonText === `${EMOJI.GAME} ဂိမ်း မုဒ်`) {
     await sendMessageWithRetry(ctx, `${EMOJI.GAME} Select Mode:`, makeModeSelectionKeyboard());
     return;
   }
@@ -6814,7 +6816,7 @@ if (userState[userId]?.state === "PLATFORM_SELECTED" && lines.length >= 2) {
   console.log(`[USER_ACTIVITY] User ${userName} (ID: ${userId}) logging into ${platform.name}`);
   activeUsers.add(userId);
   
-  await sendMessageWithRetry(ctx, `${EMOJI.LOADING} Logging into ${platform.name}...`);
+  await sendMessageWithRetry(ctx, `🔍 အကောင့်ဝင်ခြင်း စစ်ဆေးနေသည် ခဏစောင့်ပါ.......`);
   
   userPlatforms[userId] = platformKey;
   
@@ -6827,10 +6829,10 @@ if (userState[userId]?.state === "PLATFORM_SELECTED" && lines.length >= 2) {
       
 if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
   await sendMessageWithRetry(ctx, 
-    `${EMOJI.ERROR} ${STYLE.BOLD('Unauthorized user ID.')}\n\n` +
-    `${EMOJI.INFO} Free Mode is currently DISABLED.\n` +
-    `${EMOJI.INFO} Please contact @kiki20251 to add your ID:\n` +
-    `${STYLE.ITEM(`Your ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
+    `${EMOJI.ERROR} ${STYLE.BOLD('သင်၏ ID အား အတည်ပြုမထားရသေးပါ .')}\n\n` +
+    `${EMOJI.INFO} Admin အား ခွင့်ပြုချက်တောင်းပါ .\n` +
+    `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @kiki20251 သို့ ID ပို့ပေးပါ:\n` +
+    `${STYLE.ITEM(`သင်၏ ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
     makeMainKeyboard(false, isAdmin)
   );
   return;
@@ -6848,7 +6850,7 @@ if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
       if (!userSettings[userId]) {
         userSettings[userId] = {
           platform: platformKey,
-          နည်းဗျူဟာ: "TREND_FOLLOW",
+          strategy: "TREND_FOLLOW",
           betting_strategy: "Martingale",
           game_type: platformKey === "CKLOTTERY" ? "TRX" : "WINGO", 
           bet_type: "BS",
@@ -6893,10 +6895,10 @@ if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
       const modeStatus = (platformKey === "CKLOTTERY" && !freeModeEnabled) ? "" : `${EMOJI.CHECK} (Free Mode)`;
       
       const loginMessage = 
-        `${platform.color} ${STYLE.BOLD(`${platform.name} Login Successful`)} ${modeStatus}\n\n` +
-        `${EMOJI.USER} ${STYLE.BOLD('User ID:')} ${STYLE.CODE(userInfo.user_id.toString())}\n` +
-        `${EMOJI.BALANCE} ${STYLE.BOLD('Balance:')} ${balanceDisplay} Ks\n\n` +
-        `${EMOJI.START} Welcome back! Configure your settings.`;
+        `${platform.color} ${STYLE.BOLD(`အကောင့်ဝင်ခြင်း အောင်မြင်ခြင်း`)}\n\n${STYLE.BOLD(' 🔓ဂိမ်းပလန်:')} ${modeStatus}\n ${STYLE.BOLD('🎮 ဂိမ်းအမည် :')} ${platform.name}\n` +
+        `${EMOJI.USER} ${STYLE.BOLD('အသုံးပြုသူအကောင့် ID:')} ${STYLE.CODE(userInfo.user_id.toString())}\n` +
+        `${EMOJI.BALANCE} ${STYLE.BOLD('လက်ကျန်ငွေ ပမာဏ:')} ${balanceDisplay} Ks\n\n` +
+        `${EMOJI.START} ကြိုဆိုပါတယ်! သင်၏ဆက်တင်များကို စီစဉ်သတ်မှတ်ပါ။.`;
       
       await sendMessageWithRetry(ctx, loginMessage, makeMainKeyboard(true, isAdmin));
       
@@ -6965,7 +6967,7 @@ if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
     userSettings[userId].martin_index = 0;
     userSettings[userId].custom_index = 0;
     
-    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('BET SIZE set:')} ${betSizes.join(',')} Ks`, makeMainKeyboard(true, isAdmin));
+    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကြေး set:')} ${betSizes.join(',')} Ks`, makeMainKeyboard(true, isAdmin));
     delete userState[userId];
     saveUserSettings();
 } else if (currentState === "INPUT_BS_PATTERN") {
@@ -7043,7 +7045,7 @@ async function showUserStats(ctx, userId) {
   
   const settings = userSettings[userId] || {};
   const betSizes = settings.bet_sizes || [];
-  const နည်းဗျူဟာ = settings.strategy || "TREND_FOLLOW";
+  const strategy = settings.strategy || "TREND_FOLLOW";
   const bettingStrategy = settings.betting_strategy || "Martingale";
   const gameType = settings.game_type || "TRX";
   const betType = settings.bet_type || "BS";
@@ -7073,7 +7075,7 @@ async function showUserStats(ctx, userId) {
   }
   
   let betOrder = "N/A";
-  if ( === "BS_ORDER") {
+  if (strategy === "BS_ORDER") {
     betOrder = settings.pattern || "BS-Order";
   }
   
@@ -7090,7 +7092,7 @@ async function showUserStats(ctx, userId) {
   };
   
   const infoText = 
-    `${EMOJI.STATS} *ACCOUNT INFO*\n` +
+    `${EMOJI.STATS} *အကောင့် အချက်အလက်*\n` +
     `${STYLE.SEPARATOR}\n\n` +
     
     `${EMOJI.USER} *USER DETAILS*\n` +
@@ -7110,12 +7112,12 @@ async function showUserStats(ctx, userId) {
     `${EMOJI.GAME} *GAME SETTINGS*\n` +
     `${STYLE.ITEM(`Game: ${safeText(gameType)}`)}\n` +
     `${STYLE.ITEM(`Type: ${safeText(betTypeText)}`)}\n` +
-    `${STYLE.ITEM(`နည်းဗျူဟာ: ${safeText(နည်းဗျူဟာ)}`)}\n` +
+    `${STYLE.ITEM(`Strategy: ${safeText(strategy)}`)}\n` +
     `${STYLE.ITEM(`Betting: ${safeText(bettingStrategy)}`)}\n` +
     `${STYLE.LAST_ITEM(`Bet Sizes: ${safeText(betSizes.join(', ') || 'Not set')}`)}\n` +
     `${STYLE.SEPARATOR}\n\n` +
     
-    `${EMOJI.နည်းဗျူဟာ} *နည်းဗျူဟာ CONFIGURATION*\n` +
+    `${EMOJI.STRATEGY} *STRATEGY CONFIGURATION*\n` +
     `${STYLE.ITEM(`BS Order: ${safeText(betOrder)}`)}\n` +
     `${STYLE.ITEM(`Profit Target: ${safeText(profitTarget ? profitTarget + ' Ks' : 'Not set')}`)}\n` +
     `${STYLE.ITEM(`Stop Loss: ${safeText(stopLoss ? stopLoss + ' Ks' : 'Not set')}`)}\n` +
@@ -7132,7 +7134,7 @@ async function showUserStats(ctx, userId) {
 
 // ⚙️ Config
 const BASE_URL = PLATFORMS["CKLOTTERY"].baseUrl;
-const BOT_TOKEN = "8707027344:AAFcNwbwG8QdbLi-8Yg-sZLts6woF-KmdgA";
+const BOT_TOKEN = "8346296445:AAHpn8S0WrSm2ugtvDZ6ihUxMWE39JLovmY";
 const ADMIN_ID = 7308292609;
 const IGNORE_SSL = true;
 const WIN_LOSE_CHECK_INTERVAL = 2;
@@ -7216,4 +7218,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-    }
+}
