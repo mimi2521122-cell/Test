@@ -902,7 +902,7 @@ async function placeBetRequest(session, issueNumber, selectType, unitAmount, bet
   betBody.timestamp = Math.floor(Date.now() / 1000);
   
   logging.info(`Bet request details for user ${userId}:`);
-  logging.info(`  ဂိမ်းအမျိုးအစား: ${gameType}, လောင်းကစားအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
+  logging.info(`  ဂိမ်းအမျိုးအစား: ${gameType}, လောင်းကြေးအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
   logging.info(`  Issue: ${issueNumber}, SelectType: ${selectType}, Amount: ${unitAmount * betCount}`);
   
   for (let attempt = 0; attempt < MAX_BET_RETRIES; attempt++) {
@@ -5334,7 +5334,9 @@ let balanceText = "";
 
 function makePlatformKeyboard() {
   return Markup.keyboard([
-    [`${PLATFORMS["777BIGWIN"].color} ${PLATFORMS["777BIGWIN"].name}`],
+    [`${PLATFORMS["6LOTTERY"].color} ${PLATFORMS["6LOTTERY"].name}` , 
+    `${PLATFORMS["777BIGWIN"].color} ${PLATFORMS["777BIGWIN"].name}` , 
+    `${PLATFORMS["CKLOTTERY"].color} ${PLATFORMS["CKLOTTERY"].name}`],
     [`${EMOJI.BACK} Back`]
   ]).resize().oneTime(false);
 }
@@ -6167,12 +6169,12 @@ if (data.startsWith("bet_type:")) {
   if (betType === "COLOR") {
 
     await sendMessageWithRetry(ctx, 
-      `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကစားအမျိုးအစား: Color')}\n` +
+      `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကြေးအမျိုးအစား: Color')}\n` +
       `${EMOJI.INFO} Please select a strategy compatible with color betting.`,
       makeMainKeyboard(true)
     );
   } else {
-    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကစားအမျိုးအစား: Big/Small')}`, makeMainKeyboard(true));
+    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကြေးအမျိုးအစား: Big/Small')}`, makeMainKeyboard(true));
   }
   
   saveUserSettings();
@@ -6322,12 +6324,12 @@ for (const [platformKey, platform] of Object.entries(PLATFORMS)) {
 } 
   
   // Bet Type Button
-  if (buttonText === `${EMOJI.COLOR} လောင်းကစားအမျိုးအစား`) {
+  if (buttonText === `${EMOJI.COLOR} လောင်းကြေးအမျိုးအစား`) {
     const currentBetType = userSettings[userId]?.bet_type || "BS";
     const typeText = currentBetType === "COLOR" ? "Color" : "Big/Small";
     
     await sendMessageWithRetry(ctx, 
-      `${EMOJI.COLOR} ${STYLE.BOLD('လောင်းကစားအမျိုးအစား Settings')}\n\n` +
+      `${EMOJI.COLOR} ${STYLE.BOLD('လောင်းကြေးအမျိုးအစား Settings')}\n\n` +
       `${EMOJI.INFO} Current: ${STYLE.BOLD(typeText)}\n` +
       `${EMOJI.INFO} Select your preferred betting mode:`, 
       makeBetTypeKeyboard()
@@ -6814,7 +6816,7 @@ if (userState[userId]?.state === "PLATFORM_SELECTED" && lines.length >= 2) {
   console.log(`[USER_ACTIVITY] User ${userName} (ID: ${userId}) logging into ${platform.name}`);
   activeUsers.add(userId);
   
-  await sendMessageWithRetry(ctx, `🔍 အကောင့်ဝင်ခြင်း စစ်ဆေးနေသည် ခဏစောင့်ပါ.......`);
+  await sendMessageWithRetry(ctx, `${EMOJI.LOADING} Logging into ${platform.name}...`);
   
   userPlatforms[userId] = platformKey;
   
@@ -6827,10 +6829,10 @@ if (userState[userId]?.state === "PLATFORM_SELECTED" && lines.length >= 2) {
       
 if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
   await sendMessageWithRetry(ctx, 
-    `${EMOJI.ERROR} ${STYLE.BOLD('သင်၏ ID အား အတည်ပြုမထားရသေးပါ .')}\n\n` +
-    `${EMOJI.INFO} Admin အား ခွင့်ပြုချက်တောင်းပါ .\n` +
-    `${EMOJI.INFO} ခွင့်ပြုချက်တောင်းရန် @kiki20251 သို့ ID ပို့ပေးပါ:\n` +
-    `${STYLE.ITEM(`သင်၏ ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
+    `${EMOJI.ERROR} ${STYLE.BOLD('Unauthorized user ID.')}\n\n` +
+    `${EMOJI.INFO} Free Mode is currently DISABLED.\n` +
+    `${EMOJI.INFO} Please contact @kiki20251 to add your ID:\n` +
+    `${STYLE.ITEM(`Your ID: ${STYLE.CODE(gameUserId.toString())}`)}`,
     makeMainKeyboard(false, isAdmin)
   );
   return;
@@ -6893,7 +6895,7 @@ if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
       const modeStatus = (platformKey === "CKLOTTERY" && !freeModeEnabled) ? "" : `${EMOJI.CHECK} (Free Mode)`;
       
       const loginMessage = 
-        `${platform.color} ${STYLE.BOLD(`အကောင့်ဝင်ခြင်း အောင်မြင်ခြင်း`)}\n\n${STYLE.BOLD(' 🔓ဂိမ်းပလန်:')} ${modeStatus}\n ${STYLE.BOLD('🎮 ဂိမ်းအမည် :')} ${platform.name}\n` +
+        `${platform.color} ${STYLE.BOLD(`အကောင့်ဝင်ခြင်း အောင်မြင်ခြင်း`)}\n 🔓 ဂိမ်း ပလန်${modeStatus}\n ${STYLE.BOLD('🎮 ဂိမ်းအမည် :')} ${platform.name}\n` +
         `${EMOJI.USER} ${STYLE.BOLD('အသုံးပြုသူအကောင့် ID:')} ${STYLE.CODE(userInfo.user_id.toString())}\n` +
         `${EMOJI.BALANCE} ${STYLE.BOLD('လက်ကျန်ငွေ ပမာဏ:')} ${balanceDisplay} Ks\n\n` +
         `${EMOJI.START} ကြိုဆိုပါတယ်! သင်၏ဆက်တင်များကို စီစဉ်သတ်မှတ်ပါ။.`;
@@ -7216,4 +7218,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-    }
+                     }
