@@ -6895,7 +6895,7 @@ if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
       const modeStatus = (platformKey === "CKLOTTERY" && !freeModeEnabled) ? "" : `${EMOJI.CHECK} (Free Mode)`;
       
       const loginMessage = 
-        `${platform.color} ${STYLE.BOLD(`အကောင့်ဝင်ခြင်း အောင်မြင်ခြင်း`)}\n ${modeStatus}\n🎮 ဂိမ်းအမည်` +
+        `${platform.color} ${STYLE.BOLD(`အကောင့်ဝင်ခြင်း အောင်မြင်ခြင်း`)}\n 🔓 ဂိမ်း ပလန်${modeStatus}\n ${STYLE.BOLD('🎮 ဂိမ်းအမည် :')} ${platform.name}\n` +
         `${EMOJI.USER} ${STYLE.BOLD('အသုံးပြုသူအကောင့် ID:')} ${STYLE.CODE(userInfo.user_id.toString())}\n` +
         `${EMOJI.BALANCE} ${STYLE.BOLD('လက်ကျန်ငွေ ပမာဏ:')} ${balanceDisplay} Ks\n\n` +
         `${EMOJI.START} ကြိုဆိုပါတယ်! သင်၏ဆက်တင်များကို စီစဉ်သတ်မှတ်ပါ။.`;
@@ -7218,4 +7218,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-    }
+                     }
