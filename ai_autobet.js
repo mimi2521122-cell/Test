@@ -37,20 +37,10 @@ let freeModeEnabled = false;
 const activeUsers = new Set();
 
 const PLATFORMS = {
-  "6LOTTERY": {
-    name: "6LOTTERY",
-    baseUrl: "https://6lotteryapi.com/api/webapi/",
-    color: "🔴"
-  },
   "777BIGWIN": {
     name: "777BIGWIN",
     baseUrl: "https://api.bigwinqaz.com/api/webapi/",
     color: "🟢"
-  },
-  "CKLOTTERY": {
-    name: "CKLOTTERY",
-    baseUrl: "https://ckygjf6r.com/api/webapi/",
-    color: "🔵"
   }
 };
 
@@ -5334,9 +5324,7 @@ let balanceText = "";
 
 function makePlatformKeyboard() {
   return Markup.keyboard([
-    [`${PLATFORMS["6LOTTERY"].color} ${PLATFORMS["6LOTTERY"].name}` , 
-    `${PLATFORMS["777BIGWIN"].color} ${PLATFORMS["777BIGWIN"].name}` , 
-    `${PLATFORMS["CKLOTTERY"].color} ${PLATFORMS["CKLOTTERY"].name}`],
+    [`${PLATFORMS["777BIGWIN"].color} ${PLATFORMS["777BIGWIN"].name}`],
     [`${EMOJI.BACK} Back`]
   ]).resize().oneTime(false);
 }
