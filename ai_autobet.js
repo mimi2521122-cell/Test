@@ -7188,42 +7188,54 @@ async function forceJoinCheck(ctx) {
   }
 }
 
-function main() {
+async function main() {
+
   loadAllowedUsers();
   loadUserSettings();
-  loadFreeModeSetting(); 
-  
+  loadFreeModeSetting();
+
   setInterval(() => {
     const previousState = freeModeEnabled;
     loadFreeModeSetting();
     if (previousState !== freeModeEnabled) {
       logging.info(`Free Mode state changed: ${previousState ? 'ENABLED' : 'DISABLED'} → ${freeModeEnabled ? 'ENABLED' : 'DISABLED'}`);
     }
-  }, 30000); 
-  
+  }, 30000);
+
   const bot = new Telegraf(BOT_TOKEN);
-  
+
+  // ✅ ဒီ line ကိုထည့် (အရေးကြီးဆုံး)
+  await bot.telegram.deleteWebhook({ drop_pending_updates: true });
+
   bot.catch((err, ctx) => {
-  logging.error(`[BOT.CATCH] Error during update ${ctx.updateType}: ${err.message}`);
-  console.error(err.stack);
-});
+    logging.error(`[BOT.CATCH] Error during update ${ctx.updateType}: ${err.message}`);
+    console.error(err.stack);
+  });
 
-bot.start(async (ctx) => {
-  const ok = await forceJoinCheck(ctx);
-  if (!ok) return;
+  bot.start(async (ctx) => {
+    const ok = await forceJoinCheck(ctx);
+    if (!ok) return;
+    return cmdStartHandler(ctx);
+  });
 
-  return cmdStartHandler(ctx);
-});
-bot.command('allow', cmdAllowHandler);
-bot.command('remove', cmdRemoveHandler);
-bot.command('showid', cmdShowIdHandler);
-bot.command('users', cmdUsersHandler);
-bot.command('send', cmdSendHandler);
-bot.command('enable', cmdEnableFreeMode);
-bot.command('disable', cmdDisableFreeMode);
-bot.command('freemode', cmdCheckFreeMode);
-bot.on('callback_query', callbackQueryHandler);
-bot.on('text', textMessageHandler);
+  bot.command('allow', cmdAllowHandler);
+  bot.command('remove', cmdRemoveHandler);
+  bot.command('showid', cmdShowIdHandler);
+  bot.command('users', cmdUsersHandler);
+  bot.command('send', cmdSendHandler);
+  bot.command('enable', cmdEnableFreeMode);
+  bot.command('disable', cmdDisableFreeMode);
+  bot.command('freemode', cmdCheckFreeMode);
+  bot.on('callback_query', callbackQueryHandler);
+  bot.on('text', textMessageHandler);
+
+  bot.launch().then(() => {
+    logging.info('🚀 Bot started successfully with AI Mode');
+  }).catch(error => {
+    logging.error(`❌ Bot failed to start: ${error.message}`);
+  });
+
+}
 
 winLoseChecker(bot).catch(error => {
   logging.error(`Win/lose checker failed: ${error.message}`);
@@ -7257,4 +7269,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-    }
+  }
