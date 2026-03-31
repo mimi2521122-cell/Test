@@ -37,10 +37,20 @@ let freeModeEnabled = false;
 const activeUsers = new Set();
 
 const PLATFORMS = {
+  "6LOTTERY": {
+    name: "6LOTTERY",
+    baseUrl: "https://6lotteryapi.com/api/webapi/",
+    color: "🔴"
+  },
   "777BIGWIN": {
     name: "777BIGWIN",
     baseUrl: "https://api.bigwinqaz.com/api/webapi/",
     color: "🟢"
+  },
+  "CKLOTTERY": {
+    name: "CKLOTTERY",
+    baseUrl: "https://ckygjf6r.com/api/webapi/",
+    color: "🔵"
   }
 };
 
