@@ -584,7 +584,7 @@ function updateBettingStrategy(settings, isWin, betAmount) {
   const bettingStrategy = settings.betting_strategy || "Martingale";
   const betSizes = settings.bet_sizes || [100];
   
-  logging.debug(`Updating betting strategy - Strategy: ${bettingStrategy}, Result: ${isWin ? 'WIN' : 'LOSS'}, Bet Amount: ${betAmount}`);
+  logging.debug(`Updating betting strategy - Strategy: ${bettingStrategy}, ရလဒ်: ${isWin ? 'WIN' : 'LOSS'}, Bet Amount: ${betAmount}`);
   
   if (bettingStrategy === "Martingale") {
     if (isWin) {
@@ -4049,9 +4049,9 @@ if (settings.strategy === "GEMINI_AI") {
 
               let resultText;
               if (betType === "COLOR") {
-                resultText = `${EMOJI.RESULT} Result: ${number} → ${getColorName(color)} (${bigSmall === 'B' ? 'Big' : 'Small'})`;
+                resultText = `${EMOJI.RESULT} ရလဒ်: ${number} → ${getColorName(color)} (${bigSmall === 'B' ? 'Big' : 'Small'})`;
               } else {
-                resultText = `${EMOJI.RESULT} Result: ${number} → ${bigSmall === 'B' ? 'Big' : 'Small'}`;
+                resultText = `${EMOJI.RESULT} ရလဒ်: ${number} → ${bigSmall === 'B' ? 'Big' : 'Small'}`;
               }
               
               const gameId = `${EMOJI.GAME} ${escapeMarkdown(gameType)} : ${period}`;
@@ -4066,7 +4066,7 @@ if (settings.strategy === "GEMINI_AI") {
                          `${STYLE.SEPARATOR}\n`+
                          `${gameId}\n` +
                          `${resultText}\n` +
-                         `${EMOJI.BALANCE} Balance: ${currentBalance?.toFixed(2) || '0.00'} Ks\n` +
+                         `${EMOJI.BALANCE} လက်ကျန်ငွေ ${currentBalance?.toFixed(2) || '0.00'} Ks\n` +
                          `${EMOJI.PROFIT} Total Profit: ${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)} Ks`;
               } else {
                 const totalProfit = isVirtual 
@@ -4084,7 +4084,7 @@ if (settings.strategy === "GEMINI_AI") {
                          `${gameId}\n` +
                          `${resultText}\n` +
                          `${slStatusLine}` +
-                         `${EMOJI.BALANCE} Balance: ${currentBalance?.toFixed(2) || '0.00'} Ks\n` +
+                         `${EMOJI.BALANCE} လက်ကျန်ငွေ: ${currentBalance?.toFixed(2) || '0.00'} Ks\n` +
                          `${EMOJI.LOSS_ICON} Total Profit: ${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)} Ks`;
               }
               
@@ -4268,9 +4268,9 @@ if (settings.strategy === "GEMINI_AI") {
               
               let resultText;
               if (betType === "COLOR") {
-                resultText = `${EMOJI.RESULT} Result: ${number} → ${getColorName(color)} (${bigSmall === 'B' ? 'Big' : 'Small'})`;
+                resultText = `${EMOJI.RESULT} ရလဒ်: ${number} → ${getColorName(color)} (${bigSmall === 'B' ? 'Big' : 'Small'})`;
               } else {
-                resultText = `${EMOJI.RESULT} Result: ${number} → ${bigSmall === 'B' ? 'Big' : 'Small'}`;
+                resultText = `${EMOJI.RESULT} ရလဒ်: ${number} → ${bigSmall === 'B' ? 'Big' : 'Small'}`;
               }
               
               const gameId = `${EMOJI.GAME} ${escapeMarkdown(gameType)} : ${period}`;
@@ -5348,8 +5348,8 @@ function makeMainKeyboard(loggedIn = false, isAdmin = false) {
   
   let keyboard = [
     [`${EMOJI.START} စတင်ကစားမယ်`, `${EMOJI.STOP} ကစားတာ ရပ်မယ်`],
-    [`${EMOJI.BALANCE} လောင်းကြေး သတ်မှတ်`, `${EMOJI.GAME} ဂိမ်း မုဒ်`],
-    [`${EMOJI.TARGET} ဂိမ်းအမျိုးအစား`, `${EMOJI.COLOR} လောင်းကြေးအမျိုးအစား`, `${EMOJI.STRATEGY} နည်းဗျူဟာ`],
+    [`${EMOJI.BALANCE} လောင်းကြေး သတ်မှတ်`, `${EMOJI.COLOR} လောင်းကစားအမျိုးအစား`],
+    [`${EMOJI.TARGET} ဂိမ်းအမျိုးအစား`, `${EMOJI.STRATEGY} နည်းဗျူဟာ`],
     [`${EMOJI.SETTINGS} လောင်းကစား ဆက်တင်များ`, `${EMOJI.RISK} အန္တရာယ်စီမံခန့်ခွဲမှု`],
     // AI Mode ခလုတ်ထည့်ရန်
     [`${EMOJI.AI} AI Mode`, `${EMOJI.INFO} အချက်အလက်`, `${EMOJI.LOGOUT} Re-Login`]
@@ -6895,10 +6895,10 @@ if (!freeModeEnabled && !allowedsixlotteryIds.has(gameUserId)) {
       const modeStatus = (platformKey === "CKLOTTERY" && !freeModeEnabled) ? "" : `${EMOJI.CHECK} (Free Mode)`;
       
       const loginMessage = 
-        `${platform.color} ${STYLE.BOLD(`${platform.name} Login Successful`)} ${modeStatus}\n\n` +
-        `${EMOJI.USER} ${STYLE.BOLD('User ID:')} ${STYLE.CODE(userInfo.user_id.toString())}\n` +
-        `${EMOJI.BALANCE} ${STYLE.BOLD('Balance:')} ${balanceDisplay} Ks\n\n` +
-        `${EMOJI.START} Welcome back! Configure your settings.`;
+        `${platform.color} ${STYLE.BOLD(`အကောင့်ဝင်ခြင်း အောင်မြင်ခြင်း`)}\n ${modeStatus}\n🎮 ဂိမ်းအမည်` +
+        `${EMOJI.USER} ${STYLE.BOLD('အသုံးပြုသူအကောင့် ID:')} ${STYLE.CODE(userInfo.user_id.toString())}\n` +
+        `${EMOJI.BALANCE} ${STYLE.BOLD('လက်ကျန်ငွေ ပမာဏ:')} ${balanceDisplay} Ks\n\n` +
+        `${EMOJI.START} ကြိုဆိုပါတယ်! သင်၏ဆက်တင်များကို စီစဉ်သတ်မှတ်ပါ။.`;
       
       await sendMessageWithRetry(ctx, loginMessage, makeMainKeyboard(true, isAdmin));
       
@@ -7218,4 +7218,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-}
+    }
