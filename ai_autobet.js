@@ -902,7 +902,7 @@ async function placeBetRequest(session, issueNumber, selectType, unitAmount, bet
   betBody.timestamp = Math.floor(Date.now() / 1000);
   
   logging.info(`Bet request details for user ${userId}:`);
-  logging.info(`  ဂိမ်းအခန်းရွေးရန်: ${gameType}, လောင်းကစားအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
+  logging.info(`  ဂိမ်းအမျိုးအစား: ${gameType}, လောင်းကစားအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
   logging.info(`  Issue: ${issueNumber}, SelectType: ${selectType}, Amount: ${unitAmount * betCount}`);
   
   for (let attempt = 0; attempt < MAX_BET_RETRIES; attempt++) {
@@ -5349,7 +5349,7 @@ function makeMainKeyboard(loggedIn = false, isAdmin = false) {
   let keyboard = [
     [`${EMOJI.START} စတင်ကစားမယ်`, `${EMOJI.STOP} ကစားတာ ရပ်မယ်`],
     [`${EMOJI.BALANCE} လောင်းကြေး သတ်မှတ်`, `${EMOJI.COLOR} လောင်းကစားအမျိုးအစား`],
-    [`${EMOJI.TARGET} ဂိမ်းအခန်းရွေးရန်`, `${EMOJI.STRATEGY} နည်းဗျူဟာ`],
+    [`${EMOJI.TARGET} ဂိမ်းအမျိုးအစား`, `${EMOJI.STRATEGY} နည်းဗျူဟာ`],
     [`${EMOJI.SETTINGS} လောင်းကစား ဆက်တင်များ`, `${EMOJI.RISK} အန္တရာယ်စီမံခန့်ခွဲမှု`],
     // AI Mode ခလုတ်ထည့်ရန်
     [`${EMOJI.AI} AI Mode`, `${EMOJI.INFO} အချက်အလက်`, `${EMOJI.LOGOUT} Re-Login`]
@@ -6221,13 +6221,13 @@ if (data.startsWith("bet_type:")) {
     const gameType = data.split(":")[1];
     
     if (gameType === "WINGO_SELECT") {
-      await sendMessageWithRetry(ctx, `${EMOJI.GAME} ${STYLE.BOLD('Select WINGO ဂိမ်းအခန်းရွေးရန်')}`, makeWINGOSelectionKeyboard());
+      await sendMessageWithRetry(ctx, `${EMOJI.GAME} ${STYLE.BOLD('Select WINGO ဂိမ်းအမျိုးအစား')}`, makeWINGOSelectionKeyboard());
       await safeDeleteMessage(ctx);
       return;
     }
     
     userSettings[userId].game_type = gameType;
-    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('ဂိမ်းအခန်းရွေးရန် set')}`, makeMainKeyboard(true));
+    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('ဂိမ်းအမျိုးအစား set')}`, makeMainKeyboard(true));
     saveUserSettings();
     await safeDeleteMessage(ctx);
     return;
@@ -6513,8 +6513,8 @@ for (const [platformKey, platform] of Object.entries(PLATFORMS)) {
     return;
   }
   
-  if (buttonText === `${EMOJI.TARGET} ဂိမ်းအခန်းရွေးရန်`) {
-    await sendMessageWithRetry(ctx, `${EMOJI.GAME} Select ဂိမ်းအခန်းရွေးရန်:`, makeGameTypeKeyboard());
+  if (buttonText === `${EMOJI.TARGET} ဂိမ်းအမျိုးအစား`) {
+    await sendMessageWithRetry(ctx, `${EMOJI.GAME} Select ဂိမ်းအမျိုးအစား:`, makeGameTypeKeyboard());
     return;
   }
   
@@ -7218,4 +7218,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-}
+    }
