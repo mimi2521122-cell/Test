@@ -7132,7 +7132,7 @@ async function showUserStats(ctx, userId) {
 
 // ⚙️ Config
 const BASE_URL = PLATFORMS["CKLOTTERY"].baseUrl;
-const BOT_TOKEN = "8707027344:AAHxr3lKL8VYjoySvMdqZOryzUlZbIy3K30";
+const BOT_TOKEN = "8707027344:AAFQ2iF9Y0aG0dbO3oxF-McrbKBnjZOBvXo";
 const ADMIN_ID = 7308292609;
 const IGNORE_SSL = true;
 const WIN_LOSE_CHECK_INTERVAL = 2;
