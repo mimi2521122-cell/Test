@@ -902,7 +902,7 @@ async function placeBetRequest(session, issueNumber, selectType, unitAmount, bet
   betBody.timestamp = Math.floor(Date.now() / 1000);
   
   logging.info(`Bet request details for user ${userId}:`);
-  logging.info(`  ဂိမ်းအမျိုးအစား: ${gameType}, လောင်းကြေးအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
+  logging.info(`  ဂိမ်းအမျိုးအစား: ${gameType}, လောင်းကစားအမျိုးအစား: ${betType}, API gameType: ${actualGameType}`);
   logging.info(`  Issue: ${issueNumber}, SelectType: ${selectType}, Amount: ${unitAmount * betCount}`);
   
   for (let attempt = 0; attempt < MAX_BET_RETRIES; attempt++) {
@@ -6169,12 +6169,12 @@ if (data.startsWith("bet_type:")) {
   if (betType === "COLOR") {
 
     await sendMessageWithRetry(ctx, 
-      `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကြေးအမျိုးအစား: Color')}\n` +
+      `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကစားအမျိုးအစား: Color')}\n` +
       `${EMOJI.INFO} Please select a strategy compatible with color betting.`,
       makeMainKeyboard(true)
     );
   } else {
-    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကြေးအမျိုးအစား: Big/Small')}`, makeMainKeyboard(true));
+    await sendMessageWithRetry(ctx, `${EMOJI.SUCCESS} ${STYLE.BOLD('လောင်းကစားအမျိုးအစား: Big/Small')}`, makeMainKeyboard(true));
   }
   
   saveUserSettings();
@@ -6324,12 +6324,12 @@ for (const [platformKey, platform] of Object.entries(PLATFORMS)) {
 } 
   
   // Bet Type Button
-  if (buttonText === `${EMOJI.COLOR} လောင်းကြေးအမျိုးအစား`) {
+  if (buttonText === `${EMOJI.COLOR} လောင်းကစားအမျိုးအစား`) {
     const currentBetType = userSettings[userId]?.bet_type || "BS";
     const typeText = currentBetType === "COLOR" ? "Color" : "Big/Small";
     
     await sendMessageWithRetry(ctx, 
-      `${EMOJI.COLOR} ${STYLE.BOLD('လောင်းကြေးအမျိုးအစား Settings')}\n\n` +
+      `${EMOJI.COLOR} ${STYLE.BOLD('လောင်းကစားအမျိုးအစား Settings')}\n\n` +
       `${EMOJI.INFO} Current: ${STYLE.BOLD(typeText)}\n` +
       `${EMOJI.INFO} Select your preferred betting mode:`, 
       makeBetTypeKeyboard()
@@ -7218,4 +7218,4 @@ bot.launch().then(() => {
 
 if (require.main === module) {
   main();
-      }
+    }
